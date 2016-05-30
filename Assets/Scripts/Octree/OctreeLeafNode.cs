@@ -10,16 +10,16 @@ public class OctreeLeafNode<T> : OctreeNode<T>
 
     }
 
-    public override T GetAt(Vector3i position)
+    public override T GetAt(int x, int y, int z)
     {
-        int index = (int)ChildRelativeTo(position);
+        int index = ChildRelativeTo(x, y, z);
 
         return children[index];
     }
 
-    public override void SetAt(Vector3i position, T value)
+    public override void SetAt(int x, int y, int z, T value)
     {
-        int index = (int)ChildRelativeTo(position);
+        int index = ChildRelativeTo(x, y, z);
 
         children[index] = value;
     }

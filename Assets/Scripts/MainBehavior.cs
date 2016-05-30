@@ -4,21 +4,23 @@ using System.Collections.Generic;
 
 public class MainBehavior : MonoBehaviour {
 
-    VoxelWorld world = new VoxelWorld(new Vector3i(16, 16, 16), new Vector3i(10, 2, 10), 100);
 	// Use this for initialization
 	void Start () {
 
-        //world.createAll();
-
         Octree<int> octree = new Octree<int>();
-        octree.Place(new Vector3i(2, 0, 0), 1);
+        octree.Place(0, 0, 1, 1);
 
-        int x = octree.GetAt(new Vector3i(2, 0, 0));
+        octree.Place(0, 0, 2, 2);
+        octree.Place(0, 0, 3, 3);
+        octree.Place(0, 4, 2, 4);
+        octree.Place(3, 0, 2, 5);
+        octree.Place(0, 2, 2, 6);
+
+        int x = octree.GetAt(0, 2, 2);
     }
 	
 	// Update is called once per frame
 	void Update () {
-	    
-        
-	}
+
+    }
 }

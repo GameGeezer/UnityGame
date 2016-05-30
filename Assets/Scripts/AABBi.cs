@@ -24,4 +24,21 @@ public class AABBi {
 
         return lowerLegal && upperLegal;
     }
+
+    public bool Contains(int x, int y, int z)
+    {
+        int lowerMinCellX = Lower.x - x;
+        int lowerMinCellY = Lower.y - y;
+        int lowerMinCellZ = Lower.z - z;
+
+        int upperMinCellX = Upper.x - x;
+        int upperMinCellY = Upper.y - y;
+        int upperMinCellZ = Upper.z - z;
+
+        bool lowerLegal = lowerMinCellX <= 0 && lowerMinCellY <= 0 && lowerMinCellZ <= 0;
+
+        bool upperLegal = upperMinCellX >= 0 && upperMinCellY >= 0 && upperMinCellZ >= 0;
+
+        return lowerLegal && upperLegal;
+    }
 }

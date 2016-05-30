@@ -9,21 +9,21 @@
         this.Level = level;
     }
 
-    public override T GetAt(Vector3i position)
+    public override T GetAt(int x, int y, int z)
     {
-        int index = (int)ChildRelativeTo(position);
+        int index = (int)ChildRelativeTo(x, y, z);
 
         if(children[index] == null)
         {
             return default(T);
         }
 
-        return children[index].GetAt(position);
+        return children[index].GetAt(x, y, z);
     }
 
-    public override void SetAt(Vector3i position, T value)
+    public override void SetAt(int x, int y, int z, T value)
     {
-        int index = (int)ChildRelativeTo(position);
+        int index = (int)ChildRelativeTo(x, y, z);
 
         if (children[index] == null)
         {
@@ -41,7 +41,7 @@
             }
         }
 
-        children[index].SetAt(position, value);
+        children[index].SetAt(x, y, z, value);
     }
 
     public void SetChild(OctreeChild index, OctreeNode<T> node)

@@ -11,26 +11,26 @@ public abstract class OctreeNode<T> {
     public OctreeNode(Vector3i center, int level)
     {
         this.Center = center;
-        HalfCellsAccross = (int)Mathf.Pow(2, level) / 2;
+        HalfCellsAccross = (int)Mathf.Pow(2, level + 1) / 2;
         AABB = new AABBi(center - HalfCellsAccross, center + HalfCellsAccross);     
     }
 
-    public abstract T GetAt(Vector3i position);
+    public abstract T GetAt(int x, int y, int z);
 
-    public abstract void SetAt(Vector3i position, T value);
+    public abstract void SetAt(int x, int y, int z, T value);
 
-    public bool Contains(Vector3i point)
+    public bool Contains(int x, int y, int z)
     {
-        return AABB.Contains(point);
+        return AABB.Contains(x, y, z);
     }
 
-    protected OctreeChild ChildRelativeTo(Vector3i position)
+    protected int ChildRelativeTo(int x, int y, int z)
     {
-        int xMod = Convert.ToInt32((position.x - Center.x) >= 0) * OctreeConstants.X_WEIGHT;
-        int yMod = Convert.ToInt32((position.y - Center.y) >= 0) * OctreeConstants.Y_WEIGHT;
-        int zMod = Convert.ToInt32((position.z - Center.z) >= 0) * OctreeConstants.Z_WEIGHT;
+        int xMod = Convert.ToInt32((x - Center.x) >= 0) * OctreeConstants.X_WEIGHT;
+        int yMod = Convert.ToInt32((y - Center.y) >= 0) * OctreeConstants.Y_WEIGHT;
+        int zMod = Convert.ToInt32((z - Center.z) >= 0) * OctreeConstants.Z_WEIGHT;
 
-        return (OctreeChild)(xMod + yMod + zMod);
+        return xMod + yMod + zMod;
     }
 
     protected Vector3i CenterOfChildIndex(int currentLevel, int childIndex)

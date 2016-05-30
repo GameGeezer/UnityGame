@@ -1,9 +1,13 @@
-﻿using UnityEngine;
-using System.Collections;
-
+﻿
+[System.Serializable]
 public class Vector3i {
 
     public int x = 0, y = 0, z = 0;
+
+    public Vector3i()
+    {
+
+    }
 
     public Vector3i(int x, int y, int z)
     {

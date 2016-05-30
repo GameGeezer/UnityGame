@@ -3,30 +3,32 @@ using System.Collections.Generic;
 
 public class VoxelWorld : MonoBehaviour {
 
-    private int allocatedChunks;
+    public float scale = 1.0f;
+    public float magnitude = 1.0f;
 
-    private Vector3i brickDimensions, worldDimensions;
+    public Vector3i brickDimensions = new Vector3i(), worldDimensions = new Vector3i();
 
     private CubicChunkExtractor extractor;
 
-    private Stack<Brick> brickPool = new Stack<Brick>();
+    private Pool<Chunk> chunkPool = new Pool<Chunk>();
 
-    private Stack<Chunk> chunkPool = new Stack<Chunk>();
+    private BrickTree brickTree;
 
-    public VoxelWorld(Vector3i brickDimensions, Vector3i worldDimensions, int chunksToAllocate)
+    private RequestHandler requestHandler = new RequestHandler();
+
+    public void Start()
     {
-        this.allocatedChunks = chunksToAllocate;
-        this.brickDimensions = brickDimensions;
-        this.worldDimensions = worldDimensions;
-
         List<int> zeroSpaces = new List<int>();
         zeroSpaces.Add(0);
         extractor = new CubicChunkExtractor(zeroSpaces);
+        Noise2D noise = new PerlinHeightmap(scale, magnitude, 1);
+        brickTree = new BrickTree(brickDimensions.x, brickDimensions.y, brickDimensions.z, noise);
+        createAll();
     }
 
-    void Update()
+    public void Update()
     {
-
+        requestHandler.Update();
     }
 
     public void createAll()
@@ -37,7 +39,7 @@ public class VoxelWorld : MonoBehaviour {
             {
                 for (int z = 0; z < worldDimensions.z; ++z)
                 {
-                    createBrick(x * brickDimensions.x, y * brickDimensions.y, z * brickDimensions.z);
+                    createBrick(x, y, z);
                 }
             }
         }
@@ -45,16 +47,7 @@ public class VoxelWorld : MonoBehaviour {
 
     public void createBrick(int brickX, int brickY, int brickZ)
     {
-        Brick brick = new Brick(brickDimensions.x, brickDimensions.y, brickDimensions.z);
-        Noise2D noise = new PerlinHeightmap(30, 16, 1);
-        brick.fillWithNoise(brickX, brickY, brickZ, noise);
-
         Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
-        GameObject gameObject = new GameObject("Wut wut");
-        gameObject.AddComponent<MeshRenderer>();
-        gameObject.GetComponent<MeshRenderer>().material = material;
-        gameObject.AddComponent<MeshFilter>();
-        gameObject.GetComponent<MeshFilter>().mesh = extractor.Extract(brick);
-        gameObject.transform.Translate(brickX, brickY, brickZ);
+        requestHandler.QueueRequest(new ExtractChunkRequest(chunkPool, brickTree, extractor, material, brickX, brickY, brickZ));
     }
 }

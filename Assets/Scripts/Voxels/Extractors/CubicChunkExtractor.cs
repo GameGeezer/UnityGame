@@ -6,73 +6,60 @@ public class CubicChunkExtractor {
 
     private List<int> emptySpace;
 
-    List<Vector3> vertices = new List<Vector3>();
-    List<Vector3> normals = new List<Vector3>();
-    List<Vector2> uv = new List<Vector2>();
-    List<int> indices = new List<int>();
-
     public CubicChunkExtractor(List<int> emptySpace)
     {
         this.emptySpace = emptySpace;
     }
 
-    public Mesh Extract(Grid3D<int> grid)
+    public void Extract(int brickX, int brickY, int brickZ, BrickTree brickTree, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
-        Mesh mesh = new Mesh();
-        vertices.Clear();
-        normals.Clear();
-        uv.Clear();
-        indices.Clear();
+        int xOffset = brickTree.BrickDimensionX * brickX * 16;
+        int yOffset = brickTree.BrickDimensionY * brickY * 16;
+        int zOffset = brickTree.BrickDimensionZ * brickZ * 16;
 
-        for (int x = 0; x < grid.GetWidth() - 1; ++x)
+        BrickTreeCacheFilter cachedTree = new BrickTreeCacheFilter(brickTree);
+
+        for (int x = 0; x < brickTree.BrickDimensionX - 1; ++x)
         {
-            for (int y = 0; y < grid.GetHeight() - 1; ++y)
+            for (int y = 0; y < brickTree.BrickDimensionY - 1; ++y)
             {
-                for (int z = 0; z < grid.GetDepth() - 1; ++z)
+                for (int z = 0; z < brickTree.BrickDimensionZ - 1; ++z)
                 {
-                    if (CheckForTransitionX(grid, x, y, z))
+                    int trueX = x + xOffset;
+                    int trueY = y + yOffset;
+                    int trueZ = z + zOffset;
+
+                    int voxel = cachedTree.GetVoxelAt(trueX, trueY, trueZ);
+                    int voxelPlusX = cachedTree.GetVoxelAt(trueX + 1, trueY, trueZ);
+                    int voxelPlusY = cachedTree.GetVoxelAt(trueX, trueY + 1, trueZ);
+                    int voxelPlusZ = cachedTree.GetVoxelAt(trueX, trueY, trueZ + 1);
+
+                    if (CheckForTransition(voxel, voxelPlusX))
                     {
-                        AddQuadX(grid, x, y, z);
+                        AddQuadX(voxel, x, y, z, ref vertices, ref normals, ref uv, ref indices);
                     }
 
-                    if (CheckForTransitionY(grid, x, y, z))
+                    if (CheckForTransition(voxel, voxelPlusY))
                     {
-                        AddQuadY(grid,  x, y, z);
+                        AddQuadY(voxel,  x, y, z, ref vertices, ref normals, ref uv, ref indices);
                     }
 
-                    if (CheckForTransitionZ(grid, x, y, z))
+                    if (CheckForTransition(voxel, voxelPlusZ))
                     {
-                        AddQuadZ(grid, x, y, z);
+                        AddQuadZ(voxel, x, y, z, ref vertices, ref normals, ref uv, ref indices);
                     }
                 }
             }
         }
-
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = indices.ToArray();
-        mesh.normals = normals.ToArray();
-        mesh.uv = uv.ToArray(); // add this line to the code here
-        mesh.Optimize();
-
-        return mesh;
+        cachedTree.Clear();
     }
 
-    private bool CheckForTransitionX(Grid3D<int> grid, int x, int y, int z)
+    private bool CheckForTransition(int start, int end)
     {
-        return emptySpace.Contains(grid.GetValue(x, y, z)) != emptySpace.Contains(grid.GetValue(x + 1, y, z));
+        return emptySpace.Contains(start) != emptySpace.Contains(end);
     }
 
-    private bool CheckForTransitionY(Grid3D<int> grid, int x, int y, int z)
-    {
-        return emptySpace.Contains(grid.GetValue(x, y, z)) != emptySpace.Contains(grid.GetValue(x, y + 1, z));
-    }
-
-    private bool CheckForTransitionZ(Grid3D<int> grid, int x, int y, int z)
-    {
-        return emptySpace.Contains(grid.GetValue(x, y, z)) != emptySpace.Contains(grid.GetValue(x, y, z + 1));
-    }
-
-    private void AddQuadX(Grid3D<int> grid, int x, int y, int z)
+    private void AddQuadX(int voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
         int vertexIndex = vertices.Count;
 
@@ -91,7 +78,7 @@ public class CubicChunkExtractor {
         uv.Add(new Vector2(0, 1));
         uv.Add(new Vector2(1, 1));
 
-        if (emptySpace.Contains(grid.GetValue(x, y, z)))
+        if (emptySpace.Contains(voxel))
         {
             indices.Add(vertexIndex + 2);
             indices.Add(vertexIndex + 1);
@@ -114,7 +101,7 @@ public class CubicChunkExtractor {
         }
     }
 
-    private void AddQuadY(Grid3D<int> grid, int x, int y, int z)
+    private void AddQuadY(int voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
         int vertexIndex = vertices.Count;
 
@@ -134,7 +121,7 @@ public class CubicChunkExtractor {
         uv.Add(new Vector2(1, 1));
 
         
-        if(emptySpace.Contains(grid.GetValue(x, y, z)))
+        if(emptySpace.Contains(voxel))
         { 
             indices.Add(vertexIndex + 2);
             indices.Add(vertexIndex);
@@ -157,7 +144,7 @@ public class CubicChunkExtractor {
         }
     }
 
-    private void AddQuadZ(Grid3D<int> grid, int x, int y, int z)
+    private void AddQuadZ(int voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
         int vertexIndex = vertices.Count;
 
@@ -176,7 +163,7 @@ public class CubicChunkExtractor {
         uv.Add(new Vector2(0, 1));
         uv.Add(new Vector2(1, 1));
 
-        if (emptySpace.Contains(grid.GetValue(x, y, z)))
+        if (emptySpace.Contains(voxel))
         {
             indices.Add(vertexIndex + 2);
             indices.Add(vertexIndex + 1);

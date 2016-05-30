@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>5.3.4f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -77,12 +79,23 @@
     <Compile Include="Assets\Scripts\Octree\OctreeConstants.cs" />
     <Compile Include="Assets\Scripts\Octree\OctreeLeafNode.cs" />
     <Compile Include="Assets\Scripts\Octree\OctreeNode.cs" />
+    <Compile Include="Assets\Scripts\Pool\Pool.cs" />
+    <Compile Include="Assets\Scripts\Requests\Request.cs" />
+    <Compile Include="Assets\Scripts\Requests\RequestHandler.cs" />
     <Compile Include="Assets\Scripts\SDF\SDPrimitive.cs" />
     <Compile Include="Assets\Scripts\SDF\SDSphere.cs" />
+    <Compile Include="Assets\Scripts\ThreadedQueue.cs" />
     <Compile Include="Assets\Scripts\Vector3i.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Brick.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Chunk.cs" />
-    <Compile Include="Assets\Scripts\Voxels\CubicChunkExtractor.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\Brick.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\BrickConstants.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\BrickPool.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\BrickTree.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\BrickTreeCacheFilter.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Chunk\Chunk.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkBehavior.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Extractors\CubicChunkExtractor.cs" />
+    <Compile Include="Assets\Scripts\Voxels\RadialBrickEvaluator.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Requests\ExtractChunkRequest.cs" />
     <Compile Include="Assets\Scripts\Voxels\VoxelWorld.cs" />
   </ItemGroup>
   <ItemGroup>
