@@ -6,17 +6,13 @@ public class MainBehavior : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        Brick b = new Brick(16, 16, 16);
+        b.SetValue(1, 0, 0, 1);
+        PriorityQueue<Vector3i> found = new PriorityQueue<Vector3i>();
+        b.RaycastCells(new Ray(new Vector3(1.5f, 0, -1), new Vector3(0, 0, 1)), found,0 , 0 ,0);
 
-        Octree<int> octree = new Octree<int>();
-        octree.Place(0, 0, 1, 1);
-
-        octree.Place(0, 0, 2, 2);
-        octree.Place(0, 0, 3, 3);
-        octree.Place(0, 4, 2, 4);
-        octree.Place(3, 0, 2, 5);
-        octree.Place(0, 2, 2, 6);
-
-        int x = octree.GetAt(0, 2, 2);
+        int v = found.Count;
+        Vector3i d = found.Dequeue();
     }
 	
 	// Update is called once per frame

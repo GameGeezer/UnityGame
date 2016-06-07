@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 public class BrickTreeCacheFilter
 {
@@ -13,6 +14,11 @@ public class BrickTreeCacheFilter
         this.tree = tree;
     }
 
+    public void RaycastFind(Ray ray, PriorityQueue<Brick> found)
+    {
+        tree.RaycastFind(ray, found);
+    }
+
     public Brick GetAt(int x, int y, int z)
     {
         string key = HashPosition(x, y, z);
@@ -22,7 +28,11 @@ public class BrickTreeCacheFilter
             return bricks[key];
         }
 
-        Brick brick = tree.GetAt(x, y, z);
+        Brick brick;
+        lock (tree)
+        {
+            brick = tree.GetAt(x, y, z);
+        }
 
         bricks.Add(key, brick);
 
@@ -40,9 +50,9 @@ public class BrickTreeCacheFilter
         int localY = tree.FindLocalY(y);
         int localZ = tree.FindLocalZ(z);
 
-        int brickX = x / tree.BrickAndModX;
-        int brickY = y / tree.BrickAndModY;
-        int brickZ = z / tree.BrickAndModZ;
+        int brickX = x / tree.BrickDimensionX ;
+        int brickY = y / tree.BrickDimensionY;
+        int brickZ = z / tree.BrickDimensionZ;
 
         Brick brick = GetAt(brickX, brickY, brickZ);
 

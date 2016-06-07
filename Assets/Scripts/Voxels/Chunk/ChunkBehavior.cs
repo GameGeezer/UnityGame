@@ -24,7 +24,7 @@ public class ChunkBehavior : MonoBehaviour {
 
         if(magnitude > 500)
         {
-            //chunk.Release();
+            ChunkPool.Release(chunk);
         }
     }
 }

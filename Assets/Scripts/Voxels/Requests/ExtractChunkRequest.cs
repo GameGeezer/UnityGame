@@ -4,21 +4,19 @@ using System.Collections.Generic;
 
 public class ExtractChunkRequest : Request {
 
-    private Pool<Chunk> chunkPool;
     private BrickTree brickTree;
     private CubicChunkExtractor extractor;
 
-    private List<Vector3> vertices = new List<Vector3>();
-    private List<Vector3> normals = new List<Vector3>();
-    private List<Vector2> uv = new List<Vector2>();
-    private List<int> indices = new List<int>();
+    private List<Vector3> vertices = new List<Vector3>(10000);
+    private List<Vector3> normals = new List<Vector3>(10000);
+    private List<Vector2> uv = new List<Vector2>(10000);
+    private List<int> indices = new List<int>(10000);
 
     private Material material;
     private int brickX, brickY, brickZ;
 
-    public ExtractChunkRequest(Pool<Chunk> chunkPool, BrickTree brickTree, CubicChunkExtractor extractor, Material material, int brickX, int brickY, int brickZ)
+    public ExtractChunkRequest(BrickTree brickTree, CubicChunkExtractor extractor, Material material, int brickX, int brickY, int brickZ)
     {
-        this.chunkPool = chunkPool;
         this.brickTree = brickTree;
         this.extractor = extractor;
 
@@ -48,8 +46,8 @@ public class ExtractChunkRequest : Request {
             return;
         }
 
-        Chunk chunk = chunkPool.Catch();
-        chunk.Initialize(chunkPool, material, brickX * brickTree.BrickDimensionX, brickY * brickTree.BrickDimensionY, brickZ * brickTree.BrickDimensionZ);
+        Chunk chunk = ChunkPool.Catch();
+        chunk.Initialize(material, brickX * brickTree.BrickDimensionX, brickY * brickTree.BrickDimensionY, brickZ * brickTree.BrickDimensionZ);
 
         chunk.ChunkMesh.vertices = vertices.ToArray();
         chunk.ChunkMesh.triangles = indices.ToArray();

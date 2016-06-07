@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using UnityEngine;
 
 public class BrickTree
 {
@@ -17,8 +15,12 @@ public class BrickTree
     public int BrickDimensionY { get; private set; }
     public int BrickDimensionZ { get; private set; }
 
+    private Vector3 dummyVec = new Vector3();
+
     public BrickTree(int resolutionX, int resolutionY, int resolutionZ, Noise2D noise)
     {
+        this.noise = noise;
+
         BrickDimensionX = (int)Math.Pow(2, resolutionX);
         BrickDimensionY = (int)Math.Pow(2, resolutionY);
         BrickDimensionZ = (int)Math.Pow(2, resolutionZ);
@@ -28,12 +30,18 @@ public class BrickTree
         BrickAndModZ = BrickDimensionZ - 1;
 
         pool = new BrickPool(new Vector3i(BrickDimensionX, BrickDimensionY, BrickDimensionZ));
-        this.noise = noise;
+    }
+
+    public void RaycastFind(Ray ray, PriorityQueue<Brick> found)
+    {
+        octree.RayCastFind(ray, found);
     }
 
     public Brick GetAt(int x, int y, int z)
     {
-        Brick brick = octree.GetAt(x, y, z);
+        dummyVec.Set(x * 2, y * 2, z * 2);
+
+        Brick brick = octree.GetAt(dummyVec);
 
         if(brick != null)
         {
@@ -42,25 +50,25 @@ public class BrickTree
 
         brick = pool.Catch();
 
-        brick.fillWithNoise(x, y, z, noise);
+        brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
 
-        octree.Place(x, y, z, brick);
+        octree.SetAt(dummyVec, brick);
 
         return brick;
     }
 
     public int FindLocalX(int x)
     {
-        return x & BrickAndModX;
+        return x % BrickDimensionX;
     }
 
     public int FindLocalY(int y)
     {
-        return y & BrickAndModY;
+        return y % BrickDimensionY;
     }
 
     public int FindLocalZ(int z)
     {
-        return z & BrickAndModZ;
+        return z % BrickDimensionZ;
     }
 }

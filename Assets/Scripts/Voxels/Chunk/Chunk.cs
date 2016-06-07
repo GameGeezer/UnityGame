@@ -7,8 +7,6 @@ public class Chunk
 
     public Mesh ChunkMesh { get; set; }
 
-    private Pool<Chunk> pool;
-
     public Chunk()
     {
         ChunkMesh = new Mesh();
@@ -19,16 +17,14 @@ public class Chunk
         gameObject.GetComponent<MeshFilter>().mesh = ChunkMesh;
     }
 
-    public void Release()
+    public void Clear()
     {
         ChunkMesh.Clear();
-        pool.Release(this);
+        gameObject.transform.Translate(-gameObject.transform.position.x, -gameObject.transform.position.y, -gameObject.transform.position.z);
     }
 
-    public void Initialize(Pool<Chunk> pool, Material material, float x, float y, float z)
+    public void Initialize(Material material, float x, float y, float z)
     {
-        this.pool = pool;
-
         gameObject.GetComponent<MeshRenderer>().material = material;
         
         gameObject.transform.Translate(x, y, z);

@@ -11,6 +11,27 @@ public class Brick : Grid3D<int> {
         
     }
 
+    public void RaycastCells(Ray ray, PriorityQueue<Vector3i> found, float offsetX, float offsetY, float offsetZ)
+    {
+        float xMin, yMin, zMin;
+        for (int x = 0; x < GetWidth(); ++x)
+        {
+            for (int z = 0; z < GetDepth(); ++z)
+            {
+                for (int y = 0; y < GetHeight(); ++y)
+                {
+                    xMin = x + offsetX;
+                    yMin = y + offsetY;
+                    zMin = z + offsetZ;
+                    if(CollisionUtil.IntersectsBounds(ray, xMin, yMin, zMin, xMin + 1, yMin + 1, zMin + 1))
+                    {
+                        found.Enqueue(GamePools.Vector3iPool.Catch().Set(x, y, z), 1);
+                    }
+                }
+            }
+        }
+    }
+
     public void fillWithNoise(int offsetX, int offsetY, int offsetZ, Noise2D heightNoise)
     {
         for (int x = 0; x < GetWidth(); ++x)

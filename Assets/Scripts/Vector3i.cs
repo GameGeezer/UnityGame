@@ -16,6 +16,15 @@ public class Vector3i {
         this.z = z;
     }
 
+    public Vector3i Set(int x, int y, int z)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+
+        return this;
+    }
+
     public static Vector3i operator +(Vector3i vec1, Vector3i vec2)
     {
         return new Vector3i(vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z);

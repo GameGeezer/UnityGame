@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public class CubicChunkExtractor {
 
     private List<int> emptySpace;
+    private SafePool<Vector3> vec3Pool = new SafePool<Vector3>(10000);
+    private SafePool<Vector2> vec2Pool = new SafePool<Vector2>(10000);
 
     public CubicChunkExtractor(List<int> emptySpace)
     {
@@ -13,17 +15,17 @@ public class CubicChunkExtractor {
 
     public void Extract(int brickX, int brickY, int brickZ, BrickTree brickTree, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
-        int xOffset = brickTree.BrickDimensionX * brickX * 16;
-        int yOffset = brickTree.BrickDimensionY * brickY * 16;
-        int zOffset = brickTree.BrickDimensionZ * brickZ * 16;
+        int xOffset = brickTree.BrickDimensionX * brickX;
+        int yOffset = brickTree.BrickDimensionY * brickY;
+        int zOffset = brickTree.BrickDimensionZ * brickZ;
 
         BrickTreeCacheFilter cachedTree = new BrickTreeCacheFilter(brickTree);
 
-        for (int x = 0; x < brickTree.BrickDimensionX - 1; ++x)
+        for (int x = 0; x < brickTree.BrickDimensionX; ++x)
         {
-            for (int y = 0; y < brickTree.BrickDimensionY - 1; ++y)
+            for (int y = 0; y < brickTree.BrickDimensionY; ++y)
             {
-                for (int z = 0; z < brickTree.BrickDimensionZ - 1; ++z)
+                for (int z = 0; z < brickTree.BrickDimensionZ; ++z)
                 {
                     int trueX = x + xOffset;
                     int trueY = y + yOffset;
@@ -63,20 +65,38 @@ public class CubicChunkExtractor {
     {
         int vertexIndex = vertices.Count;
 
-        vertices.Add(new Vector3(x + 1, y, z));
-        vertices.Add(new Vector3(x + 1, y + 1, z));
-        vertices.Add(new Vector3(x + 1, y, z + 1));
-        vertices.Add(new Vector3(x + 1, y + 1, z + 1));
+        Vector3 fish = vec3Pool.Catch();
+        fish.Set(x + 1, y, z);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x + 1, y + 1, z);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x + 1, y, z + 1);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x + 1, y + 1, z + 1);
+        vertices.Add(fish);
 
-        normals.Add(new Vector3(1, 0, 0));
-        normals.Add(new Vector3(1, 0, 0));
-        normals.Add(new Vector3(1, 0, 0));
-        normals.Add(new Vector3(1, 0, 0));
+        fish = vec3Pool.Catch();
+        fish.Set(1, 0, 0);
+        normals.Add(fish);
+        normals.Add(fish);
+        normals.Add(fish);
+        normals.Add(fish);
 
-        uv.Add(new Vector2(0, 0));
-        uv.Add(new Vector2(1, 0));
-        uv.Add(new Vector2(0, 1));
-        uv.Add(new Vector2(1, 1));
+        Vector2 smallFish = vec2Pool.Catch();
+        smallFish.Set(0, 0);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(1, 0);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(0, 1);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(1, 1);
+        uv.Add(smallFish);
 
         if (emptySpace.Contains(voxel))
         {
@@ -105,23 +125,41 @@ public class CubicChunkExtractor {
     {
         int vertexIndex = vertices.Count;
 
-        vertices.Add(new Vector3(x, y + 1, z));
-        vertices.Add(new Vector3(x + 1, y + 1, z));
-        vertices.Add(new Vector3(x, y + 1, z + 1));
-        vertices.Add(new Vector3(x + 1, y + 1, z + 1));
+        Vector3 fish = vec3Pool.Catch();
+        fish.Set(x, y + 1, z);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x + 1, y + 1, z);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x, y + 1, z + 1);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x + 1, y + 1, z + 1);
+        vertices.Add(fish);
 
-        normals.Add(new Vector3(0, 1, 0));
-        normals.Add(new Vector3(0, 1, 0));
-        normals.Add(new Vector3(0, 1, 0));
-        normals.Add(new Vector3(0, 1, 0));
+        fish = vec3Pool.Catch();
+        fish.Set(0, 1, 0);
+        normals.Add(fish);
+        normals.Add(fish);
+        normals.Add(fish);
+        normals.Add(fish);
 
-        uv.Add(new Vector2(0, 0));
-        uv.Add(new Vector2(1, 0));
-        uv.Add(new Vector2(0, 1));
-        uv.Add(new Vector2(1, 1));
+        Vector2 smallFish = vec2Pool.Catch();
+        smallFish.Set(0, 0);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(1, 0);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(0, 1);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(1, 1);
+        uv.Add(smallFish);
 
-        
-        if(emptySpace.Contains(voxel))
+
+        if (emptySpace.Contains(voxel))
         { 
             indices.Add(vertexIndex + 2);
             indices.Add(vertexIndex);
@@ -148,20 +186,38 @@ public class CubicChunkExtractor {
     {
         int vertexIndex = vertices.Count;
 
-        vertices.Add(new Vector3(x, y, z + 1));
-        vertices.Add(new Vector3(x + 1, y, z + 1));
-        vertices.Add(new Vector3(x, y + 1, z + 1));
-        vertices.Add(new Vector3(x + 1, y + 1, z + 1));
+        Vector3 fish = vec3Pool.Catch();
+        fish.Set(x, y, z + 1);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x + 1, y, z + 1);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x, y + 1, z + 1);
+        vertices.Add(fish);
+        fish = vec3Pool.Catch();
+        fish.Set(x + 1, y + 1, z + 1);
+        vertices.Add(fish);
 
-        normals.Add(new Vector3(0, 0, 1));
-        normals.Add(new Vector3(0, 0, 1));
-        normals.Add(new Vector3(0, 0, 1));
-        normals.Add(new Vector3(0, 0, 1));
+        fish = vec3Pool.Catch();
+        fish.Set(0, 0, 1);
+        normals.Add(fish);
+        normals.Add(fish);
+        normals.Add(fish);
+        normals.Add(fish);
 
-        uv.Add(new Vector2(0, 0));
-        uv.Add(new Vector2(1, 0));
-        uv.Add(new Vector2(0, 1));
-        uv.Add(new Vector2(1, 1));
+        Vector2 smallFish = vec2Pool.Catch();
+        smallFish.Set(0, 0);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(1, 0);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(0, 1);
+        uv.Add(smallFish);
+        smallFish = vec2Pool.Catch();
+        smallFish.Set(1, 1);
+        uv.Add(smallFish);
 
         if (emptySpace.Contains(voxel))
         {
