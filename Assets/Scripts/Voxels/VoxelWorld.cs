@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class VoxelWorld : MonoBehaviour {
 
+    public Dictionary<Vector3i, Chunk> chunksAtIndex = new Dictionary<Vector3i, Chunk>();
+
     public float scale = 1.0f;
     public float magnitude = 1.0f;
 
@@ -32,15 +34,22 @@ public class VoxelWorld : MonoBehaviour {
     public void Update()
     {
         GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
-        PriorityQueue<Brick> found = new PriorityQueue<Brick>();
+        PriorityQueue<OctreeEntry<Brick>> found = new PriorityQueue<OctreeEntry<Brick>>();
         Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
-    //    brickTree.RaycastFind(ray, found);
+        brickTree.RaycastFind(ray, found);
 
         PriorityQueue<Vector3i> foundCells = new PriorityQueue<Vector3i>();
         while(found.Count > 0)
         {
-            Brick brick = found.Dequeue();
-           // brick.RaycastCells(ray, foundCells,)
+            OctreeEntry<Brick> brick = found.Dequeue();
+            brick.entry.RaycastCells(ray, foundCells, brick.bounds.min.x, brick.bounds.min.y, brick.bounds.min.z);
+            while(foundCells.Count > 0)
+            {
+                Vector3i cell = foundCells.Dequeue();
+                brick.entry.SetValue(cell.x, cell.y, cell.z, 1);
+            }
+            Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
+           // requestHandler.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brick.cell.x, brick.cell.y, brick.cell.z));
         }
         requestHandler.Update();
         requestHandler2.Update();
@@ -68,19 +77,19 @@ public class VoxelWorld : MonoBehaviour {
 
         if(x % 4 == 0)
         {
-            requestHandler.QueueRequest(new ExtractChunkRequest(brickTree, extractor, material, brickX, brickY, brickZ));
+            requestHandler.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
         }
         else if(x % 4 == 1)
         {
-            requestHandler2.QueueRequest(new ExtractChunkRequest(brickTree, extractor, material, brickX, brickY, brickZ));
+            requestHandler2.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
         }
         else if (x % 4 == 2)
         {
-            requestHandler3.QueueRequest(new ExtractChunkRequest(brickTree, extractor, material, brickX, brickY, brickZ));
+            requestHandler3.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
         }
         else if (x % 4 == 3)
         {
-            requestHandler4.QueueRequest(new ExtractChunkRequest(brickTree, extractor, material, brickX, brickY, brickZ));
+            requestHandler4.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
         }
 
         ++x;

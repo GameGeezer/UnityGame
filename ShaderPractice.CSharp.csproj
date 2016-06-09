@@ -69,6 +69,7 @@
     <Compile Include="Assets\Scripts\AABBi.cs" />
     <Compile Include="Assets\Scripts\CameraBehavior.cs" />
     <Compile Include="Assets\Scripts\CollisionUtil.cs" />
+    <Compile Include="Assets\Scripts\EditBrick.cs" />
     <Compile Include="Assets\Scripts\GamePools.cs" />
     <Compile Include="Assets\Scripts\Grid3D.cs" />
     <Compile Include="Assets\Scripts\MainBehavior.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkPool.cs" />
     <Compile Include="Assets\Scripts\Voxels\Extractors\CubicChunkExtractor.cs" />
     <Compile Include="Assets\Scripts\Voxels\RadialBrickEvaluator.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Requests\ChunkFromBrickRequest.cs" />
     <Compile Include="Assets\Scripts\Voxels\Requests\ExtractChunkRequest.cs" />
     <Compile Include="Assets\Scripts\Voxels\VoxelWorld.cs" />
   </ItemGroup>

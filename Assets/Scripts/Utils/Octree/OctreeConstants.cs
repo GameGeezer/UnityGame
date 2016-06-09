@@ -3,6 +3,8 @@
 public class OctreeConstants
 {
     public const int X_WEIGHT = 1, Y_WEIGHT = 2, Z_WEIGHT = 4;
+
+    public const int BODY_NODE_BASE_LEVEL = 1;
 }
 
 public enum OctreeChild

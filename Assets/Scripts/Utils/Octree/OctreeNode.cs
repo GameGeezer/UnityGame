@@ -5,9 +5,7 @@ public abstract class OctreeNode<T> {
 
     public int Level { get; private set; }
 
-    public float HalfCellsAccross {get; private set;}
-
-    protected Bounds bounds;
+    protected Bounds bounds, worldBounds;
 
     protected int childCount { get; set; }
 
@@ -20,30 +18,43 @@ public abstract class OctreeNode<T> {
 
     protected void Initialize(Octree<T> treeBase, Vector3i center, int level)
     {
+        Level = level;
         this.treeBase = treeBase;
         childCount = 0;
-        this.Level = level;
-        float cellsAccross = (int)Mathf.Pow(2, level + 1);
-        HalfCellsAccross = (cellsAccross / 2);
+        float cellsAccross = treeBase.cellsAccrossAtLevel[level];
+
         Vector3 boundsCenter = new Vector3(center.x, center.y, center.z);
         Vector3 boundsDimensions = new Vector3(cellsAccross, cellsAccross, cellsAccross);
         bounds = new Bounds(boundsCenter, boundsDimensions);
+
+        Vector3 worldBoundsCenter = new Vector3(center.x * treeBase.leafDimensions.x, center.y * treeBase.leafDimensions.y, center.z * treeBase.leafDimensions.z);
+        Vector3 worldBoundsDimensions = new Vector3(cellsAccross * treeBase.leafDimensions.x, cellsAccross * treeBase.leafDimensions.y, cellsAccross * treeBase.leafDimensions.z);
+        worldBounds = new Bounds(worldBoundsCenter, worldBoundsDimensions);
     }
 
-    public abstract T GetAt(Vector3 point);
+    public abstract OctreeEntry<T> GetAt(Vector3i point);
 
-    public abstract void RaycastFind(Ray ray, PriorityQueue<T> found);
+    public abstract void SetAt(Vector3i point, T value);
 
-    public abstract void SetAt(Vector3 point, T value);
+    public abstract bool RemoveAt(Vector3i point);
 
-    public abstract bool RemoveAt(Vector3 point);
+    public abstract void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<T>> found);
+    
 
-    public bool Contains(Vector3 point)
+    public bool Contains(Vector3i point)
     {
-        return bounds.Contains(point);
+        Vector3 fish = treeBase.vector3Pool.Catch();
+
+        fish.Set(point.x, point.y, point.z);
+
+        bool contains = bounds.Contains(fish);
+
+        treeBase.vector3Pool.Release(fish);
+
+        return contains;
     }
 
-    protected OctreeChild ChildRelativeTo(Vector3 point)
+    protected OctreeChild ChildRelativeTo(Vector3i point)
     {
         int xMod = Convert.ToInt32((point.x - bounds.center.x) >= 0) * OctreeConstants.X_WEIGHT;
         int yMod = Convert.ToInt32((point.y - bounds.center.y) >= 0) * OctreeConstants.Y_WEIGHT;
@@ -66,9 +77,11 @@ public abstract class OctreeNode<T> {
         yDirection = (yDirection * 2) - 1;
         xDirection = (xDirection * 2) - 1;
 
-        int newNodeCenterZ = (int)(bounds.center.z + (zDirection * HalfCellsAccross));
-        int newNodeCenterY = (int)(bounds.center.y + (yDirection * HalfCellsAccross));
-        int newNodeCenterX = (int)(bounds.center.x + (xDirection * HalfCellsAccross));
+        float halfCellsAccross = treeBase.halfCellsAccrossAtLevel[Level];
+
+        int newNodeCenterZ = (int)(bounds.center.z + (zDirection * halfCellsAccross));
+        int newNodeCenterY = (int)(bounds.center.y + (yDirection * halfCellsAccross));
+        int newNodeCenterX = (int)(bounds.center.x + (xDirection * halfCellsAccross));
 
         return new Vector3i(newNodeCenterX, newNodeCenterY, newNodeCenterZ);
     }

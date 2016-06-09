@@ -14,7 +14,7 @@ public class BrickTreeCacheFilter
         this.tree = tree;
     }
 
-    public void RaycastFind(Ray ray, PriorityQueue<Brick> found)
+    public void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<Brick>> found)
     {
         tree.RaycastFind(ray, found);
     }

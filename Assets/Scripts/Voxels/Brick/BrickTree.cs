@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BrickTree
 {
-    private Octree<Brick> octree = new Octree<Brick>();
+    private Octree<Brick> octree;
     private Noise2D noise;
     private BrickPool pool;
 
@@ -15,7 +15,7 @@ public class BrickTree
     public int BrickDimensionY { get; private set; }
     public int BrickDimensionZ { get; private set; }
 
-    private Vector3 dummyVec = new Vector3();
+    private Vector3i dummyVec = new Vector3i();
 
     public BrickTree(int resolutionX, int resolutionY, int resolutionZ, Noise2D noise)
     {
@@ -25,6 +25,8 @@ public class BrickTree
         BrickDimensionY = (int)Math.Pow(2, resolutionY);
         BrickDimensionZ = (int)Math.Pow(2, resolutionZ);
 
+        octree = new Octree<Brick>(new Vector3(BrickDimensionX, BrickDimensionY, BrickDimensionZ), new Vector3i(0, 0, 0));
+
         BrickAndModX = BrickDimensionX - 1;
         BrickAndModY = BrickDimensionY - 1;
         BrickAndModZ = BrickDimensionZ - 1;
@@ -32,7 +34,7 @@ public class BrickTree
         pool = new BrickPool(new Vector3i(BrickDimensionX, BrickDimensionY, BrickDimensionZ));
     }
 
-    public void RaycastFind(Ray ray, PriorityQueue<Brick> found)
+    public void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<Brick>> found)
     {
         octree.RayCastFind(ray, found);
     }
@@ -41,9 +43,11 @@ public class BrickTree
     {
         dummyVec.Set(x * 2, y * 2, z * 2);
 
-        Brick brick = octree.GetAt(dummyVec);
+        OctreeEntry<Brick> brickEntry = octree.GetAt(dummyVec);
 
-        if(brick != null)
+        Brick brick = brickEntry == null ? null : brickEntry.entry;
+
+        if (brick != null)
         {
             return brick;
         }

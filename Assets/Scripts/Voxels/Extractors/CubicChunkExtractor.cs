@@ -56,6 +56,39 @@ public class CubicChunkExtractor {
         cachedTree.Clear();
     }
 
+    public void Extract(Brick brick, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
+    {
+        for (int x = 0; x < brick.GetWidth() - 1; ++x)
+        {
+            for (int y = 0; y < brick.GetHeight() - 1; ++y)
+            {
+                for (int z = 0; z < brick.GetDepth() - 1; ++z)
+                {
+
+                    int voxel = brick.GetValue(x, y, z);
+                    int voxelPlusX = brick.GetValue(x + 1, y, z);
+                    int voxelPlusY = brick.GetValue(x, y + 1, z);
+                    int voxelPlusZ = brick.GetValue(x, y, z + 1);
+
+                    if (CheckForTransition(voxel, voxelPlusX))
+                    {
+                        AddQuadX(voxel, x, y, z, ref vertices, ref normals, ref uv, ref indices);
+                    }
+
+                    if (CheckForTransition(voxel, voxelPlusY))
+                    {
+                        AddQuadY(voxel, x, y, z, ref vertices, ref normals, ref uv, ref indices);
+                    }
+
+                    if (CheckForTransition(voxel, voxelPlusZ))
+                    {
+                        AddQuadZ(voxel, x, y, z, ref vertices, ref normals, ref uv, ref indices);
+                    }
+                }
+            }
+        }
+    }
+
     private bool CheckForTransition(int start, int end)
     {
         return emptySpace.Contains(start) != emptySpace.Contains(end);

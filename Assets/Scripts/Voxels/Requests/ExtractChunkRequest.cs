@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class ExtractChunkRequest : Request {
 
+    private Dictionary<Vector3i, Chunk> chunkDictionary;
     private BrickTree brickTree;
     private CubicChunkExtractor extractor;
 
@@ -13,17 +14,16 @@ public class ExtractChunkRequest : Request {
     private List<int> indices = new List<int>(10000);
 
     private Material material;
-    private int brickX, brickY, brickZ;
+    private Vector3i brickCell;
 
-    public ExtractChunkRequest(BrickTree brickTree, CubicChunkExtractor extractor, Material material, int brickX, int brickY, int brickZ)
+    public ExtractChunkRequest(BrickTree brickTree, Dictionary<Vector3i, Chunk> chunkDictionary, CubicChunkExtractor extractor, Material material, int brickX, int brickY, int brickZ)
     {
+        this.chunkDictionary = chunkDictionary;
         this.brickTree = brickTree;
         this.extractor = extractor;
 
         this.material = material;
-        this.brickX = brickX;
-        this.brickY = brickY;
-        this.brickZ = brickZ;
+        brickCell = new Vector3i(brickX, brickY, brickZ);
     }
 
     public void PrePerformance()
@@ -36,23 +36,33 @@ public class ExtractChunkRequest : Request {
 
     public void Perform()
     {
-        extractor.Extract(brickX, brickY, brickZ, brickTree, ref vertices, ref normals, ref uv, ref indices);
+        extractor.Extract(brickCell.x, brickCell.y, brickCell.z, brickTree, ref vertices, ref normals, ref uv, ref indices);
     }
 
     public void PostPerformance()
     {
+
         if(vertices.Count == 0)
         {
             return;
         }
 
         Chunk chunk = ChunkPool.Catch();
-        chunk.Initialize(material, brickX * brickTree.BrickDimensionX, brickY * brickTree.BrickDimensionY, brickZ * brickTree.BrickDimensionZ);
+        chunk.Initialize(material, brickCell.x * brickTree.BrickDimensionX, brickCell.y * brickTree.BrickDimensionY, brickCell.z * brickTree.BrickDimensionZ);
 
         chunk.ChunkMesh.vertices = vertices.ToArray();
         chunk.ChunkMesh.triangles = indices.ToArray();
         chunk.ChunkMesh.normals = normals.ToArray();
         chunk.ChunkMesh.uv = uv.ToArray(); // add this line to the code here
         chunk.ChunkMesh.Optimize();
+
+        lock (chunkDictionary)
+        {
+            if (chunkDictionary.ContainsKey(brickCell))
+            {
+                ChunkPool.Release(chunkDictionary[brickCell]);
+                chunkDictionary[brickCell] = chunk;
+            }
+        }
     }
 }

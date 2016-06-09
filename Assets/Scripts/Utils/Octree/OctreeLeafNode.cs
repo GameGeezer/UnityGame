@@ -17,37 +17,21 @@ public class OctreeLeafNode<T> : OctreeNode<T>
         return this;
     }
 
-    public override T GetAt(Vector3 point)
+    public override OctreeEntry<T> GetAt(Vector3i point)
     {
         OctreeChild index = ChildRelativeTo(point);
 
-        if(children[(int)index] != null)
-        {
-            return children[(int)index].entry;
-        }
-
-        return default(T);
+        return children[(int)index];
     }
 
-    public override void RaycastFind(Ray ray, PriorityQueue<T> found)
+    public override void SetAt(Vector3i point, T value)
     {
-        if (!bounds.IntersectRay(ray))
-        {
-            return;
-        }
+        OctreeChild index = ChildRelativeTo(point);
 
-        for (int i = 0; i < 8; ++i)
-        {
-            if(!children[i].bounds.IntersectRay(ray))
-            {
-                continue;
-            }
-
-            found.Enqueue(children[i].entry, 1); // TODO propper priority
-        }
+        SetChild(index, value);
     }
 
-    public override bool RemoveAt(Vector3 point)
+    public override bool RemoveAt(Vector3i point)
     {
         OctreeChild index = ChildRelativeTo(point);
 
@@ -61,18 +45,29 @@ public class OctreeLeafNode<T> : OctreeNode<T>
         return HasChildren();
     }
 
-    public override void SetAt(Vector3 point, T value)
+    public override void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<T>> found)
     {
-        OctreeChild index = ChildRelativeTo(point);
+        if (!worldBounds.IntersectRay(ray))
+        {
+            return;
+        }
 
-        SetChild(index, value);
+        for (int i = 0; i < 8; ++i)
+        {
+            if(children[i] == null || !children[i].bounds.IntersectRay(ray))
+            {
+                continue;
+            }
+
+            found.Enqueue(children[i], 1); // TODO propper priority
+        }
     }
 
     protected void SetChild(OctreeChild index, T node)
     {
         if(node == null)
         {
-            return;
+            RemoveChild(index);
         }
 
         if (children[(int)index] == null)
@@ -80,12 +75,15 @@ public class OctreeLeafNode<T> : OctreeNode<T>
             Vector3i center = CenterOfChildIndex((int)index);
 
             OctreeEntry<T> fish = treeBase.entryPool.Catch();
-            fish.ReInitialize(node, new Vector3(center.x - 0.5f, center.y - 0.5f, center.z - 0.5f), new Vector3(center.x + 0.5f, center.y + 0.5f, center.z + 0.5f));
+            float halfX = treeBase.leafDimensions.x / 2;
+            float halfY = treeBase.leafDimensions.y / 2;
+            float halfZ = treeBase.leafDimensions.z / 2;
+            float centerX = center.x * treeBase.leafDimensions.x;
+            float centerY = center.y * treeBase.leafDimensions.y;
+            float centerZ = center.z * treeBase.leafDimensions.z;
+            fish.ReInitialize(node, new Vector3(centerX - halfX, centerY - halfY, centerZ - halfZ), new Vector3(centerX + halfX, centerY + halfY, centerZ + halfZ));
             children[(int)index] = fish;
-        }
 
-        if(children[(int)index].entry == null)
-        {
             ++childCount;
         }
 
@@ -99,6 +97,10 @@ public class OctreeLeafNode<T> : OctreeNode<T>
             --childCount;
         }
 
-        children[(int)index].entry = default(T);
+        children[(int)index].Clean();
+
+        treeBase.entryPool.Release(children[(int)index]);
+
+        children[(int)index] = null;
     }
 }
