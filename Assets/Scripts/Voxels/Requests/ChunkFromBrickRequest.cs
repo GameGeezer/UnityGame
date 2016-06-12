@@ -47,11 +47,17 @@ public class ChunkFromBrickRequest : Request
 
     public void Perform()
     {
-        extractor.Extract(brick, ref vertices, ref normals, ref uv, ref indices);
+        lock(brick)
+        {
+            extractor.Extract(brick, ref vertices, ref normals, ref uv, ref indices);
+        }
+        
     }
 
     public void PostPerformance()
     {
+        chunk.Clear();
+
         if (vertices.Count == 0)
         {
             return;

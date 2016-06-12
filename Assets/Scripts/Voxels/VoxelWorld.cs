@@ -23,7 +23,7 @@ public class VoxelWorld : MonoBehaviour {
 
     public void Start()
     {
-        List<int> zeroSpaces = new List<int>();
+        List<byte> zeroSpaces = new List<byte>();
         zeroSpaces.Add(0);
         extractor = new CubicChunkExtractor(zeroSpaces);
         Noise2D noise = new PerlinHeightmap(scale, magnitude, 1);
@@ -42,7 +42,7 @@ public class VoxelWorld : MonoBehaviour {
         while(found.Count > 0)
         {
             OctreeEntry<Brick> brick = found.Dequeue();
-            brick.entry.RaycastCells(ray, foundCells, brick.bounds.min.x, brick.bounds.min.y, brick.bounds.min.z);
+            brick.entry.RaycastAllCells(ray, foundCells, brick.bounds.min.x, brick.bounds.min.y, brick.bounds.min.z);
             while(foundCells.Count > 0)
             {
                 Vector3i cell = foundCells.Dequeue();

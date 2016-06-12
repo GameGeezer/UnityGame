@@ -44,7 +44,7 @@ public class BrickTreeCacheFilter
         bricks.Clear();
     }
 
-    public int GetVoxelAt(int x, int y, int z)
+    public byte GetVoxelAt(int x, int y, int z)
     {
         int localX = tree.FindLocalX(x);
         int localY = tree.FindLocalY(y);

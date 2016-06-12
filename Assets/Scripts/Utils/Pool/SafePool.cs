@@ -35,4 +35,15 @@ public class SafePool<T> where T : new()
             pool.Release(chunk);
         }
     }
+
+    public void ReleaseAll(T[] fish)
+    {
+        lock (pool)
+        {
+            for(int i = 0; i < fish.Length; ++ i)
+            {
+                pool.Release(fish[i]);
+            }
+        }
+    }
 }

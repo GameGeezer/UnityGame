@@ -19,7 +19,6 @@ public class ChunkPool
     {
         lock(pool)
         {
-            chunk.Clear();
             pool.Release(chunk);
         }
     }

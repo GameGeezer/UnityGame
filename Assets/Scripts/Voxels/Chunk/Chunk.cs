@@ -19,6 +19,9 @@ public class Chunk
 
     public void Clear()
     {
+        GamePools.Vector3Pool.ReleaseAll(ChunkMesh.vertices);
+        GamePools.Vector3Pool.ReleaseAll(ChunkMesh.normals);
+        GamePools.Vector2Pool.ReleaseAll(ChunkMesh.uv);
         ChunkMesh.Clear();
         gameObject.transform.Translate(-gameObject.transform.position.x, -gameObject.transform.position.y, -gameObject.transform.position.z);
     }

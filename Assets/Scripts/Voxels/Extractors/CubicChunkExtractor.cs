@@ -4,11 +4,9 @@ using System.Collections.Generic;
 
 public class CubicChunkExtractor {
 
-    private List<int> emptySpace;
-    private SafePool<Vector3> vec3Pool = new SafePool<Vector3>(10000);
-    private SafePool<Vector2> vec2Pool = new SafePool<Vector2>(10000);
+    private List<byte> emptySpace;
 
-    public CubicChunkExtractor(List<int> emptySpace)
+    public CubicChunkExtractor(List<byte> emptySpace)
     {
         this.emptySpace = emptySpace;
     }
@@ -31,10 +29,10 @@ public class CubicChunkExtractor {
                     int trueY = y + yOffset;
                     int trueZ = z + zOffset;
 
-                    int voxel = cachedTree.GetVoxelAt(trueX, trueY, trueZ);
-                    int voxelPlusX = cachedTree.GetVoxelAt(trueX + 1, trueY, trueZ);
-                    int voxelPlusY = cachedTree.GetVoxelAt(trueX, trueY + 1, trueZ);
-                    int voxelPlusZ = cachedTree.GetVoxelAt(trueX, trueY, trueZ + 1);
+                    byte voxel = cachedTree.GetVoxelAt(trueX, trueY, trueZ);
+                    byte voxelPlusX = cachedTree.GetVoxelAt(trueX + 1, trueY, trueZ);
+                    byte voxelPlusY = cachedTree.GetVoxelAt(trueX, trueY + 1, trueZ);
+                    byte voxelPlusZ = cachedTree.GetVoxelAt(trueX, trueY, trueZ + 1);
 
                     if (CheckForTransition(voxel, voxelPlusX))
                     {
@@ -65,10 +63,10 @@ public class CubicChunkExtractor {
                 for (int z = 0; z < brick.GetDepth() - 1; ++z)
                 {
 
-                    int voxel = brick.GetValue(x, y, z);
-                    int voxelPlusX = brick.GetValue(x + 1, y, z);
-                    int voxelPlusY = brick.GetValue(x, y + 1, z);
-                    int voxelPlusZ = brick.GetValue(x, y, z + 1);
+                    byte voxel = brick.GetValue(x, y, z);
+                    byte voxelPlusX = brick.GetValue(x + 1, y, z);
+                    byte voxelPlusY = brick.GetValue(x, y + 1, z);
+                    byte voxelPlusZ = brick.GetValue(x, y, z + 1);
 
                     if (CheckForTransition(voxel, voxelPlusX))
                     {
@@ -89,45 +87,45 @@ public class CubicChunkExtractor {
         }
     }
 
-    private bool CheckForTransition(int start, int end)
+    private bool CheckForTransition(byte start, byte end)
     {
         return emptySpace.Contains(start) != emptySpace.Contains(end);
     }
 
-    private void AddQuadX(int voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
+    private void AddQuadX(byte voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
         int vertexIndex = vertices.Count;
 
-        Vector3 fish = vec3Pool.Catch();
+        Vector3 fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y, z);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y + 1, z);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y, z + 1);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y + 1, z + 1);
         vertices.Add(fish);
 
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(1, 0, 0);
         normals.Add(fish);
         normals.Add(fish);
         normals.Add(fish);
         normals.Add(fish);
 
-        Vector2 smallFish = vec2Pool.Catch();
+        Vector2 smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(0, 0);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(1, 0);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(0, 1);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(1, 1);
         uv.Add(smallFish);
 
@@ -154,40 +152,40 @@ public class CubicChunkExtractor {
         }
     }
 
-    private void AddQuadY(int voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
+    private void AddQuadY(byte voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
         int vertexIndex = vertices.Count;
 
-        Vector3 fish = vec3Pool.Catch();
+        Vector3 fish = GamePools.Vector3Pool.Catch();
         fish.Set(x, y + 1, z);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y + 1, z);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x, y + 1, z + 1);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y + 1, z + 1);
         vertices.Add(fish);
 
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(0, 1, 0);
         normals.Add(fish);
         normals.Add(fish);
         normals.Add(fish);
         normals.Add(fish);
 
-        Vector2 smallFish = vec2Pool.Catch();
+        Vector2 smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(0, 0);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(1, 0);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(0, 1);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(1, 1);
         uv.Add(smallFish);
 
@@ -215,40 +213,40 @@ public class CubicChunkExtractor {
         }
     }
 
-    private void AddQuadZ(int voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
+    private void AddQuadZ(byte voxel, int x, int y, int z, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices)
     {
         int vertexIndex = vertices.Count;
 
-        Vector3 fish = vec3Pool.Catch();
+        Vector3 fish = GamePools.Vector3Pool.Catch();
         fish.Set(x, y, z + 1);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y, z + 1);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x, y + 1, z + 1);
         vertices.Add(fish);
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(x + 1, y + 1, z + 1);
         vertices.Add(fish);
 
-        fish = vec3Pool.Catch();
+        fish = GamePools.Vector3Pool.Catch();
         fish.Set(0, 0, 1);
         normals.Add(fish);
         normals.Add(fish);
         normals.Add(fish);
         normals.Add(fish);
 
-        Vector2 smallFish = vec2Pool.Catch();
+        Vector2 smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(0, 0);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(1, 0);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(0, 1);
         uv.Add(smallFish);
-        smallFish = vec2Pool.Catch();
+        smallFish = GamePools.Vector2Pool.Catch();
         smallFish.Set(1, 1);
         uv.Add(smallFish);
 
@@ -261,9 +259,7 @@ public class CubicChunkExtractor {
 
             indices.Add(vertexIndex + 1);
             indices.Add(vertexIndex + 2);
-            indices.Add(vertexIndex + 3);
-
-            
+            indices.Add(vertexIndex + 3);     
         }
         else
         {
