@@ -6,57 +6,57 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text;
 
-[Serializable()]
-public struct HeapEntry<T>
+public struct HeapEntry<PriorityType, T> where PriorityType : IComparable
 {
     private T item;
-    private IComparable priority;
-    public HeapEntry(T item, IComparable priority)
+    private PriorityType priority;
+
+    public HeapEntry(T item, PriorityType priority)
     {
         this.item = item;
         this.priority = priority;
     }
+
     public T Item
     {
         get { return item; }
     }
-    public IComparable Priority
+
+    public PriorityType Priority
     {
         get { return priority; }
     }
+
     public void Clear()
     {
         item = default(T);
-        priority = null;
+        priority = default(PriorityType);
     }
 }
 
-[Serializable()]
-public class PriorityQueue<T> : ICollection, ISerializable
+public class PriorityQueue<PriorityType, T> : ICollection where PriorityType : IComparable
 {
-    private int count;
-    private int capacity;
-    private int version;
-    private HeapEntry<T>[] heap;
+    private int count, capacity, version;
 
-    private const string capacityName = "capacity";
-    private const string countName = "count";
-    private const string heapName = "heap";
+    private HeapEntry<PriorityType, T>[] heap;
 
     public PriorityQueue()
     {
-        capacity = 15; // 15 is equal to 4 complete levels
-        heap = new HeapEntry<T>[capacity];
+        capacity = 15;
+        heap = new HeapEntry<PriorityType, T>[capacity];
     }
 
-    protected PriorityQueue(SerializationInfo info, StreamingContext context)
+    public PriorityType PeekPriority()
     {
-        capacity = info.GetInt32(capacityName);
-        count = info.GetInt32(countName);
-        HeapEntry<T>[] heapCopy = (HeapEntry<T>[])info.GetValue(heapName, typeof(HeapEntry<T>[]));
-        heap = new HeapEntry<T>[capacity];
-        Array.Copy(heapCopy, 0, heap, 0, count);
-        version = 0;
+        return heap[0].Priority;
+    }
+
+    public void Clear()
+    {
+        while(count > 0)
+        {
+            Dequeue();
+        }
     }
 
     public T Dequeue()
@@ -65,25 +65,27 @@ public class PriorityQueue<T> : ICollection, ISerializable
             throw new InvalidOperationException();
 
         T result = heap[0].Item;
-        count--;
+
+        --count;
         trickleDown(0, heap[count]);
         heap[count].Clear();
-        version++;
+        ++version;
         return result;
     }
 
-    public void Enqueue(T item, IComparable priority)
+    public void Enqueue(T item, PriorityType priority)
     {
         if (priority == null)
             throw new ArgumentNullException("priority");
         if (count == capacity)
             growHeap();
-        count++;
-        bubbleUp(count - 1, new HeapEntry<T>(item, priority));
-        version++;
+
+        ++count;
+        bubbleUp(count - 1, new HeapEntry<PriorityType, T>(item, priority));
+        ++version;
     }
 
-    private void bubbleUp(int index, HeapEntry<T> he)
+    private void bubbleUp(int index, HeapEntry<PriorityType, T> he)
     {
         int parent = getParent(index);
         // note: (index > 0) means there is a parent
@@ -110,18 +112,17 @@ public class PriorityQueue<T> : ICollection, ISerializable
     private void growHeap()
     {
         capacity = (capacity * 2) + 1;
-        HeapEntry<T>[] newHeap = new HeapEntry<T>[capacity];
+        HeapEntry<PriorityType, T>[] newHeap = new HeapEntry<PriorityType, T>[capacity];
         System.Array.Copy(heap, 0, newHeap, 0, count);
         heap = newHeap;
     }
 
-    private void trickleDown(int index, HeapEntry<T> he)
+    private void trickleDown(int index, HeapEntry<PriorityType, T> he)
     {
         int child = getLeftChild(index);
         while (child < count)
         {
-            if (((child + 1) < count) &&
-                (heap[child].Priority.CompareTo(heap[child + 1].Priority) < 0))
+            if (((child + 1) < count) && (heap[child].Priority.CompareTo(heap[child + 1].Priority) < 0))
             {
                 child++;
             }
@@ -160,31 +161,18 @@ public class PriorityQueue<T> : ICollection, ISerializable
     #region IEnumerable implementation
     public IEnumerator GetEnumerator()
     {
-        return new PriorityQueueEnumerator<T>(this);
-    }
-    #endregion
-
-    #region ISerializable implementation
-    [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-    void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue(capacityName, capacity);
-        info.AddValue(countName, count);
-        HeapEntry<T>[] heapCopy = new HeapEntry<T>[count];
-        Array.Copy(heap, 0, heapCopy, 0, count);
-        info.AddValue(heapName, heapCopy, typeof(HeapEntry<T>[]));
+        return new PriorityQueueEnumerator<PriorityType, T>(this);
     }
     #endregion
 
     #region Priority Queue enumerator
-    [Serializable()]
-    private class PriorityQueueEnumerator<T> : IEnumerator
+    private class PriorityQueueEnumerator<PriorityType, T> : IEnumerator where PriorityType : IComparable
     {
         private int index;
-        private PriorityQueue<T> pq;
+        private PriorityQueue<PriorityType, T> pq;
         private int version;
 
-        public PriorityQueueEnumerator(PriorityQueue<T> pq)
+        public PriorityQueueEnumerator(PriorityQueue<PriorityType, T> pq)
         {
             this.pq = pq;
             Reset();

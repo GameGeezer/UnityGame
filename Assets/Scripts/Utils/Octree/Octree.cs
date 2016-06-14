@@ -65,7 +65,7 @@ public class Octree<T> {
         }
     }
 
-    public void RayCastFind(Ray ray, PriorityQueue<OctreeEntry<T>> found)
+    public void RayCastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
     {
         root.RaycastFind(ray, found);
     }

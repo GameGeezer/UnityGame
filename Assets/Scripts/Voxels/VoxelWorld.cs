@@ -14,35 +14,36 @@ public class VoxelWorld : MonoBehaviour {
 
     private BrickTree brickTree;
 
-    private RequestHandler requestHandler = new RequestHandler();
-    private RequestHandler requestHandler2 = new RequestHandler();
-    private RequestHandler requestHandler3 = new RequestHandler();
-    private RequestHandler requestHandler4 = new RequestHandler();
-
-    int x = 1;
+    private RequestCircle requestHandlers = new RequestCircle();
 
     public void Start()
     {
         List<byte> zeroSpaces = new List<byte>();
         zeroSpaces.Add(0);
-        extractor = new CubicChunkExtractor(zeroSpaces);
+        //extractor = new CubicChunkExtractor(zeroSpaces);
         Noise2D noise = new PerlinHeightmap(scale, magnitude, 1);
         brickTree = new BrickTree(brickDimensions.x, brickDimensions.y, brickDimensions.z, noise);
+
+        for(int i = 0; i < 4; ++i)
+        {
+            requestHandlers.Add(new RequestHandler());
+        }
+
         createAll();
     }
 
     public void Update()
     {
         GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
-        PriorityQueue<OctreeEntry<Brick>> found = new PriorityQueue<OctreeEntry<Brick>>();
+        PriorityQueue<float, OctreeEntry<Brick>> found = new PriorityQueue<float, OctreeEntry<Brick>>();
         Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         brickTree.RaycastFind(ray, found);
 
-        PriorityQueue<Vector3i> foundCells = new PriorityQueue<Vector3i>();
+        PriorityQueue<float, Vector3i> foundCells = new PriorityQueue<float, Vector3i>();
         while(found.Count > 0)
         {
             OctreeEntry<Brick> brick = found.Dequeue();
-            brick.entry.RaycastAllCells(ray, foundCells, brick.bounds.min.x, brick.bounds.min.y, brick.bounds.min.z);
+            //brick.entry.RaycastAllCells(ray, foundCells, brick.bounds.min.x, brick.bounds.min.y, brick.bounds.min.z);
             while(foundCells.Count > 0)
             {
                 Vector3i cell = foundCells.Dequeue();
@@ -51,10 +52,8 @@ public class VoxelWorld : MonoBehaviour {
             Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
            // requestHandler.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brick.cell.x, brick.cell.y, brick.cell.z));
         }
-        requestHandler.Update();
-        requestHandler2.Update();
-        requestHandler3.Update();
-        requestHandler4.Update();
+
+        requestHandlers.Update();
     }
 
     public void createAll()
@@ -74,24 +73,7 @@ public class VoxelWorld : MonoBehaviour {
     public void createBrick(int brickX, int brickY, int brickZ)
     {
         Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
-
-        if(x % 4 == 0)
-        {
-            requestHandler.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
-        }
-        else if(x % 4 == 1)
-        {
-            requestHandler2.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
-        }
-        else if (x % 4 == 2)
-        {
-            requestHandler3.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
-        }
-        else if (x % 4 == 3)
-        {
-            requestHandler4.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
-        }
-
-        ++x;
+        RequestHandler handler = requestHandlers.Grab();
+        handler.QueueRequest(new ExtractChunkRequest(brickTree, chunksAtIndex, extractor, material, brickX, brickY, brickZ));
     }
 }

@@ -65,10 +65,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\AABB.cs" />
-    <Compile Include="Assets\Scripts\AABBi.cs" />
     <Compile Include="Assets\Scripts\CameraBehavior.cs" />
     <Compile Include="Assets\Scripts\CollisionUtil.cs" />
+    <Compile Include="Assets\Scripts\CraftHUD\MaterialScrollView.cs" />
     <Compile Include="Assets\Scripts\EditBrick.cs" />
     <Compile Include="Assets\Scripts\GamePools.cs" />
     <Compile Include="Assets\Scripts\Grid3D.cs" />
@@ -90,18 +89,28 @@
     <Compile Include="Assets\Scripts\Utils\Pool\Pool.cs" />
     <Compile Include="Assets\Scripts\Utils\Pool\SafePool.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\Request.cs" />
+    <Compile Include="Assets\Scripts\Utils\Requests\RequestCircle.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\RequestHandler.cs" />
     <Compile Include="Assets\Scripts\Vector3i.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Atlas\Brushes\SetVoxelAdjacentBrush.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Atlas\Brushes\SetVoxelBrush.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Atlas\Brushes\VoxelBrush.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Atlas\StateOfMatter.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Atlas\VoxelMaterial.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Atlas\VoxelMaterialAtlas.cs" />
+    <Compile Include="Assets\Scripts\Voxels\BrickWorld.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brick\Brick.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brick\BrickConstants.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brick\BrickPool.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brick\BrickTree.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brick\BrickTreeCacheFilter.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\Selectors\BrickCellSelector.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\Selectors\OccupiedCellSelector.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brick\Selectors\UnoccupiedCellSelector.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\Chunk.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkBehavior.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkPool.cs" />
     <Compile Include="Assets\Scripts\Voxels\Extractors\CubicChunkExtractor.cs" />
-    <Compile Include="Assets\Scripts\Voxels\RadialBrickEvaluator.cs" />
     <Compile Include="Assets\Scripts\Voxels\Requests\ChunkFromBrickRequest.cs" />
     <Compile Include="Assets\Scripts\Voxels\Requests\ExtractChunkRequest.cs" />
     <Compile Include="Assets\Scripts\Voxels\VoxelWorld.cs" />

@@ -18,10 +18,12 @@
 					float3 normal : NORMAL;
 					float4 color : COLOR;
 				};
+
 				struct VertexOutput {
 					float4 position : SV_POSITION;
 					float4 color : COLOR;
 				};
+
 				VertexOutput vert(VertexInput v) {
 					VertexOutput o;
 

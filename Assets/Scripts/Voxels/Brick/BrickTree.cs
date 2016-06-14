@@ -34,7 +34,7 @@ public class BrickTree
         pool = new BrickPool(new Vector3i(BrickDimensionX, BrickDimensionY, BrickDimensionZ));
     }
 
-    public void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<Brick>> found)
+    public void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<Brick>> found)
     {
         octree.RayCastFind(ray, found);
     }
@@ -53,6 +53,8 @@ public class BrickTree
         }
 
         brick = pool.Catch();
+
+        brick.ReInitialize(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ);
 
         brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
 

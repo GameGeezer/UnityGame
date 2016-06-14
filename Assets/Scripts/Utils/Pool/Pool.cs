@@ -28,4 +28,12 @@ public class Pool<T> where T : new()
     {
         pool.Push(fish);
     }
+
+    public void ReleaseAll(T[] fish)
+    {
+        for (int i = 0; i < fish.Length; ++i)
+        {
+            pool.Push(fish[i]);
+        }
+    }
 }

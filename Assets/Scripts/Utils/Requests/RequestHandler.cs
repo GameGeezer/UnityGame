@@ -54,7 +54,7 @@ public class RequestHandler {
 
     private void PerformRequest()
     {
-        while (true)
+        while (running)
         {
             Request request;
             bool completed = requests.TryDequeue(out request);

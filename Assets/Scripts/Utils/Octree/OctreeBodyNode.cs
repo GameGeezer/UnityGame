@@ -83,7 +83,7 @@ public class OctreeBodyNode<T> : OctreeNode<T>
         return HasChildren();
     }
 
-    public override void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<T>> found)
+    public override void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
     {
         if(!worldBounds.IntersectRay(ray))
         {

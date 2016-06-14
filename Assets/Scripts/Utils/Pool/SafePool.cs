@@ -40,10 +40,7 @@ public class SafePool<T> where T : new()
     {
         lock (pool)
         {
-            for(int i = 0; i < fish.Length; ++ i)
-            {
-                pool.Release(fish[i]);
-            }
+            pool.ReleaseAll(fish);
         }
     }
 }

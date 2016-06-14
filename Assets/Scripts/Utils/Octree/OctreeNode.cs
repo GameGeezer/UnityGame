@@ -38,7 +38,7 @@ public abstract class OctreeNode<T> {
 
     public abstract bool RemoveAt(Vector3i point);
 
-    public abstract void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<T>> found);
+    public abstract void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found);
     
 
     public bool Contains(Vector3i point)

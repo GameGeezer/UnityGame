@@ -4,63 +4,96 @@ using System.Collections.Generic;
 
 public class EditBrick : MonoBehaviour {
 
-    private Pool<ChunkFromBrickRequest> extractRequestPool = new Pool<ChunkFromBrickRequest>();
-
     public Vector3i brickDimensions = new Vector3i();
+
+    private VoxelMaterialAtlas materialAtlas = new VoxelMaterialAtlas();
 
     private CubicChunkExtractor extractor;
 
     private Brick brick;
 
-    private RequestHandler requestHandler = new RequestHandler();
+    private RequestCircle requestHandlers = new RequestCircle(3);
 
-    private List<byte> zeroSpaces = new List<byte>();
+    private Pool<ChunkFromBrickRequest> extractRequestPool = new Pool<ChunkFromBrickRequest>();
 
     Chunk chunk;
 
+    VoxelMaterial air;
+    VoxelMaterial grass;
+    VoxelMaterial dirt;
 
-    int x = 1;
+    VoxelMaterial currentMaterial;
+
+
+    VoxelBrush setBrush, setAdjacentBrush, currentBrush;
+
+    int brush = 1;
 
     public void Start()
     {
-        zeroSpaces.Add(0);
+        air = new VoxelMaterial(new Color(1, 0, 1), StateOfMatter.GAS);
+        grass = new VoxelMaterial(new Color(0, 1, 0), StateOfMatter.SOLID);
+        dirt = new VoxelMaterial(new Color(1, 0.5f, 0.5f), StateOfMatter.SOLID);
+        materialAtlas.AddVoxelMaterial(0, air);
+        materialAtlas.AddVoxelMaterial(1, grass);
+        materialAtlas.AddVoxelMaterial(2, dirt);
 
-        extractor = new CubicChunkExtractor(zeroSpaces);
+        
+
+        extractor = new CubicChunkExtractor(materialAtlas);
+
         brick = new Brick(brickDimensions.x, brickDimensions.y, brickDimensions.z);
         brick.SetValue(1, 1, 1, 1);
         Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
         ChunkFromBrickRequest request = extractRequestPool.Catch();
-        chunk = request.ReInitialize(brick, extractor, material, 0, 0, 0);
-        requestHandler.QueueRequest(request);
-        requestHandler.Update();
+        chunk = request.ReInitialize(brick, extractor, material, 0, 0, 0, extractRequestPool);
+        requestHandlers.Grab().QueueRequest(request);
+
+        setBrush = new SetVoxelBrush();
+        setAdjacentBrush = new SetVoxelAdjacentBrush();
     }
 
     public void Update()
     {
-        requestHandler.Update();
+        requestHandlers.Update();
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            currentBrush = setBrush;
+            currentMaterial = air;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            currentBrush = setAdjacentBrush;
+            currentMaterial = grass;
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            currentBrush = setAdjacentBrush;
+            currentMaterial = dirt;
+        }
 
         if (!Input.GetMouseButtonDown(0))
         {
             return;
         }
-            
+
         GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
         Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 
-        Vector3i adjacent;
-        float distance;
-        if (brick.RaycastAjacentCell(ray, zeroSpaces, 0, 0, 0, out adjacent, out distance))
+        if (currentBrush.Stroke(ray, brick, currentMaterial, materialAtlas))
         {
-            brick.SetValue(adjacent.x, adjacent.y, adjacent.z, 1);
             brick.CleanEdges();
 
             Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
             ChunkPool.Release(chunk);
             ChunkFromBrickRequest request = extractRequestPool.Catch();
-            chunk = request.ReInitialize(brick, extractor, material, 0, 0, 0);
-            requestHandler.QueueRequest(request);
-            
-        }
+            chunk = request.ReInitialize(brick, extractor, material, 0, 0, 0, extractRequestPool);
+            requestHandlers.Grab().QueueRequest(request);
 
+        }
     }
 }

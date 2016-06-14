@@ -36,7 +36,7 @@ public class ExtractChunkRequest : Request {
 
     public void Perform()
     {
-        extractor.Extract(brickCell.x, brickCell.y, brickCell.z, brickTree, ref vertices, ref normals, ref uv, ref indices);
+      //  extractor.Extract(brickCell.x, brickCell.y, brickCell.z, brickTree, ref vertices, ref normals, ref uv, ref indices);
     }
 
     public void PostPerformance()
