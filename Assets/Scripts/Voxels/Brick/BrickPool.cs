@@ -4,11 +4,11 @@ using System.Collections.Generic;
 class BrickPool
 {
     private Stack<Brick> pool = new Stack<Brick>();
-    private Vector3i brickDimensions;
+    private Vector3i brickResolution;
 
-    public BrickPool(Vector3i brickDimensions)
+    public BrickPool(Vector3i brickResolution)
     {
-        this.brickDimensions = brickDimensions;
+        this.brickResolution = brickResolution;
     }
 
     public Brick Catch()
@@ -16,7 +16,7 @@ class BrickPool
         Brick fish;
         lock (pool)
         {
-            fish = pool.Count > 0 ? pool.Pop() : new Brick(brickDimensions.x, brickDimensions.y, brickDimensions.z);
+            fish = pool.Count > 0 ? pool.Pop() : new Brick(brickResolution.x, brickResolution.y, brickResolution.z);
         }
 
         return fish;

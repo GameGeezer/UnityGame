@@ -8,10 +8,10 @@ public class ExtractChunkRequest : Request {
     private BrickTree brickTree;
     private CubicChunkExtractor extractor;
 
-    private List<Vector3> vertices = new List<Vector3>(10000);
-    private List<Vector3> normals = new List<Vector3>(10000);
-    private List<Vector2> uv = new List<Vector2>(10000);
-    private List<int> indices = new List<int>(10000);
+    private List<Vector3> vertices = new List<Vector3>();
+    private List<Vector3> normals = new List<Vector3>();
+    private List<Vector2> uv = new List<Vector2>();
+    private List<int> indices = new List<int>();
 
     private Material material;
     private Vector3i brickCell;

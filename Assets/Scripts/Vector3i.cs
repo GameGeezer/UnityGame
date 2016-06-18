@@ -44,4 +44,9 @@ public class Vector3i {
     {
         return new Vector3i(vec1.x - shift, vec1.y - shift, vec1.z - shift);
     }
+
+    public override string ToString()
+    {
+        return "x" + x + "y" + y + "z" + z;
+    }
 }

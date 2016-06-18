@@ -5,32 +5,39 @@ public abstract class OctreeNode<T> {
 
     public int Level { get; private set; }
 
-    protected Bounds bounds, worldBounds;
-
     protected int childCount { get; set; }
+
+    public Bounds bounds, worldBounds;
 
     protected Octree<T> treeBase;
 
+    private Vector3 center = new Vector3();
+
     public OctreeNode()
     {
-        
+        bounds = new Bounds();
+        worldBounds = new Bounds();
     }
 
-    protected void Initialize(Octree<T> treeBase, Vector3i center, int level)
+    protected void Initialize(Octree<T> treeBase, Vector3i min, int level)
     {
-        Level = level;
+        this.Level = level;
         this.treeBase = treeBase;
-        childCount = 0;
+        this.childCount = 0;
+        // Get the size this cell is accross
         float cellsAccross = treeBase.cellsAccrossAtLevel[level];
+        float halfCellsAccross = treeBase.halfCellsAccrossAtLevel[level];
 
-        Vector3 boundsCenter = new Vector3(center.x, center.y, center.z);
-        Vector3 boundsDimensions = new Vector3(cellsAccross, cellsAccross, cellsAccross);
-        bounds = new Bounds(boundsCenter, boundsDimensions);
+        center = new Vector3(min.x + halfCellsAccross, min.y + halfCellsAccross, min.z + halfCellsAccross);
+        float maxX = min.x + cellsAccross;
+        float maxY = min.y + cellsAccross;
+        float maxZ = min.z + cellsAccross;
+        bounds.SetMinMax(new Vector3(min.x, min.y, min.z), new Vector3(maxX, maxY, maxZ));
 
-        Vector3 worldBoundsCenter = new Vector3(center.x * treeBase.leafDimensions.x, center.y * treeBase.leafDimensions.y, center.z * treeBase.leafDimensions.z);
-        Vector3 worldBoundsDimensions = new Vector3(cellsAccross * treeBase.leafDimensions.x, cellsAccross * treeBase.leafDimensions.y, cellsAccross * treeBase.leafDimensions.z);
-        worldBounds = new Bounds(worldBoundsCenter, worldBoundsDimensions);
+        worldBounds.SetMinMax(new Vector3(min.x * treeBase.leafDimensions.x, min.y * treeBase.leafDimensions.y, min.z * treeBase.leafDimensions.z), new Vector3(maxX * treeBase.leafDimensions.x, maxY * treeBase.leafDimensions.y, maxZ * treeBase.leafDimensions.z));
     }
+
+    public abstract void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found);
 
     public abstract OctreeEntry<T> GetAt(Vector3i point);
 
@@ -38,12 +45,12 @@ public abstract class OctreeNode<T> {
 
     public abstract bool RemoveAt(Vector3i point);
 
-    public abstract void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found);
+    public abstract void Draw();
     
 
     public bool Contains(Vector3i point)
     {
-        Vector3 fish = treeBase.vector3Pool.Catch();
+        Vector3 fish = new Vector3();
 
         fish.Set(point.x, point.y, point.z);
 
@@ -54,34 +61,43 @@ public abstract class OctreeNode<T> {
         return contains;
     }
 
-    protected OctreeChild ChildRelativeTo(Vector3i point)
+    public void DirectionTowardsPoint(Vector3i point, out int xDirection, out int yDirection, out int zDirection)
     {
-        int xMod = Convert.ToInt32((point.x - bounds.center.x) >= 0) * OctreeConstants.X_WEIGHT;
-        int yMod = Convert.ToInt32((point.y - bounds.center.y) >= 0) * OctreeConstants.Y_WEIGHT;
-        int zMod = Convert.ToInt32((point.z - bounds.center.z) >= 0) * OctreeConstants.Z_WEIGHT;
+        xDirection = Convert.ToInt32((point.x - center.x) < 0);
+        yDirection = Convert.ToInt32((point.y - center.y) < 0);
+        zDirection = Convert.ToInt32((point.z - center.z) < 0);
+    }
+
+    public OctreeChild ChildRelativeTo(Vector3i point)
+    {
+        int xMod = Convert.ToInt32(point.x >= bounds.center.x) * OctreeConstants.X_WEIGHT;
+        int yMod = Convert.ToInt32(point.y >= bounds.center.y) * OctreeConstants.Y_WEIGHT;
+        int zMod = Convert.ToInt32(point.z >= bounds.center.z) * OctreeConstants.Z_WEIGHT;
 
         return (OctreeChild)(xMod + yMod + zMod);
     }
 
-    protected Vector3i CenterOfChildIndex(int childIndex)
+    public void IndexToDirection(int index, out int xDirection, out int yDirection, out int zDirection)
+    {
+        zDirection = Convert.ToInt32(index >= OctreeConstants.Z_WEIGHT);
+        index -= zDirection * OctreeConstants.Z_WEIGHT;
+        yDirection = Convert.ToInt32(index >= OctreeConstants.Y_WEIGHT);
+        index -= yDirection * OctreeConstants.Y_WEIGHT;
+        xDirection = Convert.ToInt32(index >= OctreeConstants.X_WEIGHT);
+        index -= xDirection * OctreeConstants.X_WEIGHT;
+    }
+
+    protected Vector3i MinOfChildIndex(int childIndex)
     {
         // Represent each direction on a range of [0, 1]. 0 being negaive, 1 being positive
-        int zDirection = Convert.ToInt32(childIndex >= OctreeConstants.Z_WEIGHT);
-        childIndex -= zDirection * OctreeConstants.Z_WEIGHT;
-        int yDirection = Convert.ToInt32(childIndex >= OctreeConstants.Y_WEIGHT);
-        childIndex -= yDirection * OctreeConstants.Y_WEIGHT;
-        int xDirection = Convert.ToInt32(childIndex >= OctreeConstants.X_WEIGHT);
-        childIndex -= xDirection * OctreeConstants.X_WEIGHT;
-        // Convert the range from [0, 1] to [-1, 1]
-        zDirection = (zDirection * 2) - 1;
-        yDirection = (yDirection * 2) - 1;
-        xDirection = (xDirection * 2) - 1;
+        int xDirection, yDirection, zDirection;
+        IndexToDirection(childIndex, out xDirection, out yDirection, out zDirection);
 
         float halfCellsAccross = treeBase.halfCellsAccrossAtLevel[Level];
 
-        int newNodeCenterZ = (int)(bounds.center.z + (zDirection * halfCellsAccross));
-        int newNodeCenterY = (int)(bounds.center.y + (yDirection * halfCellsAccross));
-        int newNodeCenterX = (int)(bounds.center.x + (xDirection * halfCellsAccross));
+        int newNodeCenterZ = (int)(bounds.min.z + (zDirection * halfCellsAccross));
+        int newNodeCenterY = (int)(bounds.min.y + (yDirection * halfCellsAccross));
+        int newNodeCenterX = (int)(bounds.min.x + (xDirection * halfCellsAccross));
 
         return new Vector3i(newNodeCenterX, newNodeCenterY, newNodeCenterZ);
     }
@@ -89,20 +105,5 @@ public abstract class OctreeNode<T> {
     protected bool HasChildren()
     {
         return childCount != 0;
-    }
-
-    public int GetCenterX()
-    {
-        return (int)bounds.center.x;
-    }
-
-    public int GetCenterY()
-    {
-        return (int)bounds.center.y;
-    }
-
-    public int GetCenterZ()
-    {
-        return (int)bounds.center.z;
     }
 }

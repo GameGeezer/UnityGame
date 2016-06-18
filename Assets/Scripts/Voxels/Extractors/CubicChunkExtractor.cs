@@ -12,12 +12,11 @@ public class CubicChunkExtractor {
         this.materialAtlas = materialAtlas;
     }
 
-    /*
-    public void Extract(int brickX, int brickY, int brickZ, BrickTree brickTree, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)
+    public void Extract(BrickTree brickTree, Vector3i brickWorld, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)
     {
-        int xOffset = brickTree.BrickDimensionX * brickX;
-        int yOffset = brickTree.BrickDimensionY * brickY;
-        int zOffset = brickTree.BrickDimensionZ * brickZ;
+        int xOffset = brickTree.BrickDimensionX * brickWorld.x;
+        int yOffset = brickTree.BrickDimensionY * brickWorld.y;
+        int zOffset = brickTree.BrickDimensionZ * brickWorld.z;
 
         BrickTreeCacheFilter cachedTree = new BrickTreeCacheFilter(brickTree);
         int normalDirection;
@@ -38,24 +37,24 @@ public class CubicChunkExtractor {
 
                     if (CheckForTransition(voxel, voxelPlusX, out normalDirection))
                     {
-                        AddQuadX(voxel, x, y, z, normalDirection, ref vertices, ref normals, ref uv, ref indices, ref vector2Pool, ref vector3Pool);
+                        AddQuadX(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
                     }
 
                     if (CheckForTransition(voxel, voxelPlusY, out normalDirection))
                     {
-                        AddQuadY(voxel,  x, y, z, normalDirection, ref vertices, ref normals, ref uv, ref indices, ref vector2Pool, ref vector3Pool);
+                        AddQuadY(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
                     }
 
                     if (CheckForTransition(voxel, voxelPlusZ, out normalDirection))
                     {
-                        AddQuadZ(voxel, x, y, z, normalDirection, ref vertices, ref normals, ref uv, ref indices, ref vector2Pool, ref vector3Pool);
+                        AddQuadZ(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
                     }
                 }
             }
         }
         cachedTree.Clear();
     }
-    */
+    
     public void Extract(Brick brick, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)
     {
         int normalDirection;

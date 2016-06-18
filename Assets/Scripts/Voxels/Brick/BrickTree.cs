@@ -15,8 +15,6 @@ public class BrickTree
     public int BrickDimensionY { get; private set; }
     public int BrickDimensionZ { get; private set; }
 
-    private Vector3i dummyVec = new Vector3i();
-
     public BrickTree(int resolutionX, int resolutionY, int resolutionZ, Noise2D noise)
     {
         this.noise = noise;
@@ -31,7 +29,7 @@ public class BrickTree
         BrickAndModY = BrickDimensionY - 1;
         BrickAndModZ = BrickDimensionZ - 1;
 
-        pool = new BrickPool(new Vector3i(BrickDimensionX, BrickDimensionY, BrickDimensionZ));
+        pool = new BrickPool(new Vector3i(resolutionX, resolutionY, resolutionZ));
     }
 
     public void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<Brick>> found)
@@ -39,9 +37,15 @@ public class BrickTree
         octree.RayCastFind(ray, found);
     }
 
+    public void DrawWireFrame()
+    {
+        octree.DrawWireFrame();
+    }
+
     public Brick GetAt(int x, int y, int z)
     {
-        dummyVec.Set(x * 2, y * 2, z * 2);
+        Vector3i dummyVec = new Vector3i();
+        dummyVec.Set(x, y, z);
 
         OctreeEntry<Brick> brickEntry = octree.GetAt(dummyVec);
 
@@ -54,7 +58,7 @@ public class BrickTree
 
         brick = pool.Catch();
 
-        brick.ReInitialize(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ);
+       // brick.ReInitialize(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ);
 
         brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
 

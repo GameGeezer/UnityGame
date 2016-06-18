@@ -8,18 +8,13 @@ public class SetVoxelAdjacentBrush : VoxelBrush
 {
     private PriorityQueue<float, Vector3i> found = new PriorityQueue<float, Vector3i>();
 
-    private OccupiedCellSelector selector = new OccupiedCellSelector();
+    private Grid3DSelectBlackList<byte> selector = new Grid3DSelectBlackList<byte>();
 
-    public SetVoxelAdjacentBrush()
-    {
-
-    }
-
-    public override bool Stroke(Ray ray, Brick brick, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas)
+    public override bool Stroke(Ray ray, Brick brick, Vector3 brickPosition, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList)
     {
         found.Clear();
-
-        selector.Select(ray, brick, materialAtlas, found);
+        
+        selector.Select(ray, brick, brickPosition, blackList, found);
 
         if (found.Count == 0)
         {
@@ -27,12 +22,9 @@ public class SetVoxelAdjacentBrush : VoxelBrush
         }
 
         Vector3i firstIntersection = found.Dequeue();
-
-        ray.origin.Set(ray.origin.x - brick.worldPosition.x, ray.origin.y - brick.worldPosition.y, ray.origin.z - brick.worldPosition.z);
+        Ray offsetRay = new Ray(new Vector3(ray.origin.x - brickPosition.x, ray.origin.y - brickPosition.y, ray.origin.z - brickPosition.z), ray.direction);
         float distance;
-        Vector3i adjacent = RayEntersCellFromCell(ray, firstIntersection, out distance);
-
-        ray.origin.Set(ray.origin.x + brick.worldPosition.x, ray.origin.y + brick.worldPosition.y, ray.origin.z + brick.worldPosition.z);
+        Vector3i adjacent = RayEntersCellFromCell(offsetRay, firstIntersection, out distance);
 
         brick.SetValue(adjacent.x, adjacent.y, adjacent.z, materialAtlas.GetMaterialId(voxelMaterial));
 

@@ -12,7 +12,7 @@ public class EditBrick : MonoBehaviour {
 
     private Brick brick;
 
-    private RequestCircle requestHandlers = new RequestCircle(3);
+    private RequestCircle requestHandlers = new RequestCircle(3, 100);
 
     private Pool<ChunkFromBrickRequest> extractRequestPool = new Pool<ChunkFromBrickRequest>();
 
@@ -29,6 +29,8 @@ public class EditBrick : MonoBehaviour {
 
     int brush = 1;
 
+    private List<byte> blackList = new List<byte>();
+
     public void Start()
     {
         air = new VoxelMaterial(new Color(1, 0, 1), StateOfMatter.GAS);
@@ -38,15 +40,15 @@ public class EditBrick : MonoBehaviour {
         materialAtlas.AddVoxelMaterial(1, grass);
         materialAtlas.AddVoxelMaterial(2, dirt);
 
-        
 
+        blackList.Add(0);
         extractor = new CubicChunkExtractor(materialAtlas);
 
         brick = new Brick(brickDimensions.x, brickDimensions.y, brickDimensions.z);
         brick.SetValue(1, 1, 1, 1);
         Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
         ChunkFromBrickRequest request = extractRequestPool.Catch();
-        chunk = request.ReInitialize(brick, extractor, material, 0, 0, 0, extractRequestPool);
+        chunk = request.ReInitialize(brick, extractor, material, 1, 1, 1, extractRequestPool);
         requestHandlers.Grab().QueueRequest(request);
 
         setBrush = new SetVoxelBrush();
@@ -84,14 +86,14 @@ public class EditBrick : MonoBehaviour {
         GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
         Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 
-        if (currentBrush.Stroke(ray, brick, currentMaterial, materialAtlas))
+        if (currentBrush.Stroke(ray, brick, new Vector3(brick.GetWidth(), brick.GetHeight(), brick.GetDepth()), currentMaterial, materialAtlas, blackList))
         {
             brick.CleanEdges();
 
             Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
             ChunkPool.Release(chunk);
             ChunkFromBrickRequest request = extractRequestPool.Catch();
-            chunk = request.ReInitialize(brick, extractor, material, 0, 0, 0, extractRequestPool);
+            chunk = request.ReInitialize(brick, extractor, material, 1, 1, 1, extractRequestPool);
             requestHandlers.Grab().QueueRequest(request);
 
         }

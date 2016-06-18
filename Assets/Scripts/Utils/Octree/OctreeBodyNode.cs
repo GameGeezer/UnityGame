@@ -10,13 +10,31 @@ public class OctreeBodyNode<T> : OctreeNode<T>
         
     }
 
-    public OctreeBodyNode<T> ReInitialize(Octree<T> treeBase, Vector3i center, int level)
+    public OctreeBodyNode<T> ReInitialize(Octree<T> treeBase, Vector3i min, int level)
     {
-        Initialize(treeBase, center, level);
+        Initialize(treeBase, min, level);
 
         //TODO reset chilren
 
         return this;
+    }
+
+    public override void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
+    {
+        if (!worldBounds.IntersectRay(ray))
+        {
+            return;
+        }
+
+        for (int i = 0; i < 8; ++i)
+        {
+            if (children[i] == null)
+            {
+                continue;
+            }
+
+            children[i].RaycastFind(ray, found);
+        }
     }
 
     public override OctreeEntry<T> GetAt(Vector3i point)
@@ -38,7 +56,7 @@ public class OctreeBodyNode<T> : OctreeNode<T>
         if (children[index] == null)
         {
             // Find the new child center
-            Vector3i nodeCenter = CenterOfChildIndex(index);
+            Vector3i nodeMin = MinOfChildIndex(index);
 
             // Create a leaf node if the level is below BODY_NODE_BASE_LEVEL
             if (Level == OctreeConstants.BODY_NODE_BASE_LEVEL)
@@ -46,7 +64,7 @@ public class OctreeBodyNode<T> : OctreeNode<T>
                 // Request a new leaf node
                 OctreeLeafNode<T> fish = treeBase.leafNodePool.Catch();
                 // initialize the leaf node
-                fish.ReInitialize(treeBase, nodeCenter);
+                fish.ReInitialize(treeBase, nodeMin);
                 // Set the child at index to the new node
                 SetChild((OctreeChild)index, fish);
             }
@@ -55,7 +73,7 @@ public class OctreeBodyNode<T> : OctreeNode<T>
                 //Requesta new body node
                 OctreeBodyNode<T> fish = treeBase.bodyNodePool.Catch();
                 // initialize the body node
-                fish.ReInitialize(treeBase, nodeCenter, Level - 1);
+                fish.ReInitialize(treeBase, nodeMin, Level - 1);
                 // Set the child at index to the new node
                 SetChild((OctreeChild)index, fish);
             }
@@ -83,22 +101,20 @@ public class OctreeBodyNode<T> : OctreeNode<T>
         return HasChildren();
     }
 
-    public override void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
+    public override void Draw()
     {
-        if(!worldBounds.IntersectRay(ray))
-        {
-            return;
-        }
-
         for (int i = 0; i < 8; ++i)
         {
-            if(children[i] == null)
+            if (children[i] == null)
             {
                 continue;
             }
 
-            children[i].RaycastFind(ray, found);
+            children[i].Draw();
         }
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(worldBounds.center, worldBounds.extents * 2);
     }
 
     public void PlaceChild(OctreeChild index, OctreeNode<T> node)
@@ -149,3 +165,4 @@ public class OctreeBodyNode<T> : OctreeNode<T>
         children[(int)index] = null;
     }
 }
+

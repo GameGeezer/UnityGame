@@ -8,18 +8,18 @@ public class SetVoxelBrush : VoxelBrush
 {
     private PriorityQueue<float, Vector3i> found = new PriorityQueue<float, Vector3i>();
 
-    private OccupiedCellSelector selector = new OccupiedCellSelector();
+    private Grid3DSelectBlackList<byte> selector = new Grid3DSelectBlackList<byte>();
 
     public SetVoxelBrush()
     {
 
     }
 
-    public override bool Stroke(Ray ray, Brick brick, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas)
+    public override bool Stroke(Ray ray, Brick brick, Vector3 brickPosition, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList)
     {
         found.Clear();
 
-        selector.Select(ray, brick, materialAtlas, found);
+        selector.Select(ray, brick, brickPosition, blackList, found);
 
         if (found.Count == 0)
         {

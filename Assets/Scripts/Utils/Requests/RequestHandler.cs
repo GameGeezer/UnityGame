@@ -11,10 +11,14 @@ public class RequestHandler {
 
     private ThreadedQueue<Request> completedRequests = new ThreadedQueue<Request>();
 
+    private int sleepMilliseconds;
+
     private bool running = true;
 
-    public RequestHandler()
+    public RequestHandler(int sleepMilliseconds)
     {
+        this.sleepMilliseconds = sleepMilliseconds;
+
         thread = new Thread(PerformRequest);
 
         thread.Start();
@@ -66,7 +70,7 @@ public class RequestHandler {
 
             completedRequests.Enqueue(request);
 
-            Thread.Sleep(1);
+            Thread.Sleep(sleepMilliseconds);
         }
         
     }

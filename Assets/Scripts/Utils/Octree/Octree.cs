@@ -5,13 +5,14 @@ using System.Collections.Generic;
 
 public class Octree<T> {
 
-    private OctreeBodyNode<T> root;
-    public Vector3 leafDimensions;
+    public Vector3 leafDimensions { get; private set; }
 
-    public Pool<OctreeEntry<T>> entryPool = new Pool<OctreeEntry<T>>();
-    public Pool<OctreeBodyNode<T>> bodyNodePool = new Pool<OctreeBodyNode<T>>();
-    public Pool<OctreeLeafNode<T>> leafNodePool = new Pool<OctreeLeafNode<T>>();
-    public Pool<Vector3> vector3Pool = new Pool<Vector3>();
+    private OctreeBodyNode<T> root;
+
+    public SafePool<OctreeEntry<T>> entryPool = new SafePool<OctreeEntry<T>>();
+    public SafePool<OctreeBodyNode<T>> bodyNodePool = new SafePool<OctreeBodyNode<T>>();
+    public SafePool<OctreeLeafNode<T>> leafNodePool = new SafePool<OctreeLeafNode<T>>();
+    public SafePool<Vector3> vector3Pool = new SafePool<Vector3>();
 
     public Dictionary<int, float> cellsAccrossAtLevel = new Dictionary<int, float>();
     public Dictionary<int, float> halfCellsAccrossAtLevel = new Dictionary<int, float>();
@@ -19,12 +20,18 @@ public class Octree<T> {
     public Octree(Vector3 leafDimensions, Vector3i startPosition)
     {
         this.leafDimensions = leafDimensions;
+        // Maintain dimensions in the Octree to avoid dublicating throught the leaves
         CreateDimensionsAtLevel(0);
         CreateDimensionsAtLevel(1);
         // Create the root node
         OctreeBodyNode<T> rootNode = bodyNodePool.Catch();
         // Initialize the root node
         root = rootNode.ReInitialize(this, startPosition, 1);    
+    }
+
+    public void RayCastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
+    {
+        root.RaycastFind(ray, found);
     }
 
     public OctreeEntry<T> GetAt(Vector3i point)
@@ -65,9 +72,9 @@ public class Octree<T> {
         }
     }
 
-    public void RayCastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
+    public void DrawWireFrame()
     {
-        root.RaycastFind(ray, found);
+        root.Draw();
     }
 
     public void CreateDimensionsAtLevel(int level)
@@ -84,9 +91,8 @@ public class Octree<T> {
         // Add new entries to the dimension dictionaries
         CreateDimensionsAtLevel(root.Level + 1);
         // Find the direction of the point relative to the root
-        int xDirection = Convert.ToInt32((point.x - root.GetCenterX()) < 0);
-        int yDirection = Convert.ToInt32((point.y - root.GetCenterY()) < 0);
-        int zDirection = Convert.ToInt32((point.z - root.GetCenterZ()) < 0);
+        int xDirection, yDirection, zDirection;
+        root.DirectionTowardsPoint(point, out xDirection, out yDirection, out zDirection);
         // Find the weights which will be used to create the OcteeChild index
         int xIndexMod = xDirection * OctreeConstants.X_WEIGHT;
         int yIndexMod = yDirection * OctreeConstants.Y_WEIGHT;
@@ -98,15 +104,15 @@ public class Octree<T> {
         yDirection = Convert.ToInt32(yDirection == 0);
         zDirection = Convert.ToInt32(zDirection == 0);
 
-        int halfCellsAccross = (int)halfCellsAccrossAtLevel[root.Level];
+        int cellsAccross = (int)cellsAccrossAtLevel[root.Level];
 
-        int rootCenterX = ((xDirection * 2) - 1) * halfCellsAccross;
-        int rootCenterY = ((yDirection * 2) - 1) * halfCellsAccross;
-        int rootCenterZ = ((zDirection * 2) - 1) * halfCellsAccross;
+        int rootMinX = ((xDirection) * cellsAccross); //+ (int)root.bounds.min.x;
+        int rootMinY = ((yDirection) * cellsAccross); //+ (int)root.bounds.min.y;
+        int rootMinZ = ((zDirection) * cellsAccross); //+ (int)root.bounds.min.z;
 
         OctreeBodyNode<T> newRootNode = bodyNodePool.Catch();
 
-        newRootNode.ReInitialize(this, new Vector3i(rootCenterX, rootCenterY, rootCenterZ), root.Level + 1);
+        newRootNode.ReInitialize(this, new Vector3i(rootMinX, rootMinY, rootMinZ), root.Level + 1);
 
         newRootNode.PlaceChild(moveRootTo, root);
 

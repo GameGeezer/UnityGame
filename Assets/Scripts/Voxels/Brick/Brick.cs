@@ -8,19 +8,9 @@ using System.Collections.Generic;
  */
 public class Brick : Grid3D<byte> {
 
-    public Vector3 worldPosition
-    {
-        get; private set;
-    }
-
     public Brick(int resolutionX, int resolutionY, int resolutionZ) : base((int)Math.Pow(2, resolutionX), (int)Math.Pow(2, resolutionY), (int)Math.Pow(2, resolutionZ))
     {
-        worldPosition = new Vector3();
-    }
-
-    public void ReInitialize(float x, float y, float z)
-    {
-        worldPosition.Set(x, y, z);
+        
     }
 
     public void CleanEdges()

@@ -3,26 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+/*
+TODO, what if a thread is stopped?
+*/
+
 public class RequestCircle
 {
     private Queue<RequestHandler> pool = new Queue<RequestHandler>();
 
-    public RequestCircle()
-    {
-
-    }
-
-    public RequestCircle(int handlerCount)
+    public RequestCircle(int handlerCount, int sleepMiliSeconds)
     {
         for (int i = 0; i < handlerCount; ++i)
         {
-            Add(new RequestHandler());
+            Add(new RequestHandler(sleepMiliSeconds));
         }
     }
 
     public RequestHandler Grab()
     {
         RequestHandler fish = pool.Dequeue();
+
         pool.Enqueue(fish);
 
         return fish;
