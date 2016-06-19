@@ -32,7 +32,7 @@ public abstract class OctreeNode<T> {
         float maxX = min.x + cellsAccross;
         float maxY = min.y + cellsAccross;
         float maxZ = min.z + cellsAccross;
-        bounds.SetMinMax(new Vector3(min.x, min.y, min.z), new Vector3(maxX, maxY, maxZ));
+        bounds.SetMinMax(new Vector3(min.x , min.y, min.z), new Vector3(maxX - 1, maxY - 1, maxZ - 1));
 
         worldBounds.SetMinMax(new Vector3(min.x * treeBase.leafDimensions.x, min.y * treeBase.leafDimensions.y, min.z * treeBase.leafDimensions.z), new Vector3(maxX * treeBase.leafDimensions.x, maxY * treeBase.leafDimensions.y, maxZ * treeBase.leafDimensions.z));
     }
@@ -56,7 +56,7 @@ public abstract class OctreeNode<T> {
 
         bool contains = bounds.Contains(fish);
 
-        treeBase.vector3Pool.Release(fish);
+        //treeBase.vector3Pool.Release(fish);
 
         return contains;
     }
@@ -70,9 +70,9 @@ public abstract class OctreeNode<T> {
 
     public OctreeChild ChildRelativeTo(Vector3i point)
     {
-        int xMod = Convert.ToInt32(point.x >= bounds.center.x) * OctreeConstants.X_WEIGHT;
-        int yMod = Convert.ToInt32(point.y >= bounds.center.y) * OctreeConstants.Y_WEIGHT;
-        int zMod = Convert.ToInt32(point.z >= bounds.center.z) * OctreeConstants.Z_WEIGHT;
+        int xMod = Convert.ToInt32(point.x >= center.x) * OctreeConstants.X_WEIGHT;
+        int yMod = Convert.ToInt32(point.y >= center.y) * OctreeConstants.Y_WEIGHT;
+        int zMod = Convert.ToInt32(point.z >= center.z) * OctreeConstants.Z_WEIGHT;
 
         return (OctreeChild)(xMod + yMod + zMod);
     }

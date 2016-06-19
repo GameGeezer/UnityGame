@@ -3,10 +3,33 @@ using UnityEngine;
 
 public class Grid3DSelectBlackList<T> : Grid3DRaycastSelector<T>
 {
-    public void Select(Ray ray, Grid3D<T> brick, Vector3 brickPosition, List<T> whiteList, PriorityQueue<float, Vector3i> out_found)
+    public void Select(Ray ray, Grid3D<T> grid, Vector3 brickPosition, List<T> blackList, PriorityQueue<float, Vector3i> out_found)
     {
-        Ray offsetRay = new Ray(new Vector3(ray.origin.x - brickPosition.x, ray.origin.y - brickPosition.y, ray.origin.z - brickPosition.z), ray.direction);
-        RaycastFilledCellsHelper(offsetRay, brick, whiteList, out_found, 0, 0, 0, brick.GetWidth(), brick.GetHeight(), brick.GetDepth());
+       // Ray offsetRay = new Ray(new Vector3(ray.origin.x - brickPosition.x, ray.origin.y - brickPosition.y, ray.origin.z - brickPosition.z), ray.direction);
+        RaycastFilledCellsBFHelper(ray, grid, blackList, out_found, brickPosition.x, brickPosition.y, brickPosition.z, grid.GetWidth(), grid.GetHeight(), grid.GetDepth());
+    }
+
+    private void RaycastFilledCellsBFHelper(Ray ray, Grid3D<T> brick, List<T> blackList, PriorityQueue<float, Vector3i> out_found, float x, float y, float z, int width, int height, int depth)
+    {
+        for(int i = 0; i < width; ++i)
+        {
+            for(int j = 0; j < height; ++j)
+            {
+                for(int k = 0; k < depth; ++k)
+                {
+                    if (!blackList.Contains(brick.GetValue(i, j, k)))
+                    {
+                        float distance;
+                        if (!CollisionUtil.IntersectsBounds(ray, x + i, y + j, z + k, x + i + 1, y + j + 1,  z +k + 1, out distance))
+                        {
+                            continue;
+                        }
+
+                        out_found.Enqueue(new Vector3i(i, j, k), BrickConstants.LARGE_FLOAT - distance);
+                    }
+                }
+            }
+        }
     }
 
     private void RaycastFilledCellsHelper(Ray ray, Grid3D<T> brick, List<T> blackList, PriorityQueue<float, Vector3i> out_found, int x, int y, int z, int width, int height, int depth)

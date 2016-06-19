@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SafeOctree<T>
 {
-    private Octree<T> octree;
+    Octree<T> octree;
 
     public SafeOctree(Vector3 leafDimensions, Vector3i startPosition)
     {
@@ -12,7 +12,7 @@ public class SafeOctree<T>
 
     public void RayCastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
     {
-        lock(octree)
+        lock (this)
         {
             octree.RayCastFind(ray, found);
         }
@@ -20,7 +20,7 @@ public class SafeOctree<T>
 
     public T GetAt(Vector3i point)
     {
-        lock (octree)
+        lock(this)
         {
             return octree.GetAt(point);
         }
@@ -28,17 +28,36 @@ public class SafeOctree<T>
 
     public void SetAt(Vector3i point, T value)
     {
-        lock (octree)
+        lock(this)
         {
             octree.SetAt(point, value);
         }
     }
 
+
+    public void SetAtIfNull(Vector3i point, T value)
+    {
+        lock (this)
+        {
+            T stored = GetAt(point);
+
+            if(stored == null)
+            {
+                octree.SetAt(point, value);
+            }
+        }
+    }
+
     public void RemoveAt(Vector3i point)
     {
-        lock (octree)
+        lock(this)
         {
             octree.RemoveAt(point);
         }
+    }
+
+    public void DrawWireFrame()
+    {
+        octree.DrawWireFrame();
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BrickTree
 {
-    private Octree<Brick> octree;
+    private SafeOctree<Brick> octree;
     private Noise2D noise;
     private BrickPool pool;
 
@@ -23,7 +23,7 @@ public class BrickTree
         BrickDimensionY = (int)Math.Pow(2, resolutionY);
         BrickDimensionZ = (int)Math.Pow(2, resolutionZ);
 
-        octree = new Octree<Brick>(new Vector3(BrickDimensionX, BrickDimensionY, BrickDimensionZ), new Vector3i(0, 0, 0));
+        octree = new SafeOctree<Brick>(new Vector3(BrickDimensionX, BrickDimensionY, BrickDimensionZ), new Vector3i(0, 0, 0));
 
         BrickAndModX = BrickDimensionX - 1;
         BrickAndModY = BrickDimensionY - 1;
@@ -50,23 +50,21 @@ public class BrickTree
         Brick brick = null;
 
         brick = octree.GetAt(dummyVec);
- 
 
         if (brick != null)
         {
             return brick;
         }
 
-        brick = pool.Catch();
-
-       // brick.ReInitialize(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ);
+        lock(pool)
+        {
+             brick = pool.Catch();
+        }
+       
 
         brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
 
-        lock (octree)
-        {
-            octree.SetAt(dummyVec, brick);
-        }
+        octree.SetAtIfNull(dummyVec, brick);
 
         return brick;
     }
@@ -82,8 +80,29 @@ public class BrickTree
         int brickZ = z / BrickDimensionZ;
 
         Brick brick = GetAt(brickX, brickY, brickZ);
+    
+        lock(brick)
+        {
+            return brick.GetValue(localX, localY, localZ);
+        }     
+    }
 
-        return brick.GetValue(localX, localY, localZ);
+    public void SetVoxelAt(int x, int y, int z, byte value)
+    {
+        int localX = FindLocalX(x);
+        int localY = FindLocalY(y);
+        int localZ = FindLocalZ(z);
+
+        int brickX = x / BrickDimensionX;
+        int brickY = y / BrickDimensionY;
+        int brickZ = z / BrickDimensionZ;
+
+        Brick brick = GetAt(brickX, brickY, brickZ);
+
+        lock (brick)
+        {
+            brick.SetValue(localX, localY, localZ, value);
+        }
     }
 
     public int FindLocalX(int x)

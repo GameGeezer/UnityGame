@@ -67,6 +67,8 @@ public class Octree<T> {
         }
         else
         {
+            Debug.Log("min: " + root.bounds.min + " max :" + root.bounds.max);
+            Debug.Log(point);
             // Grow the octree towards the cell
             GrowTowards(point);
             // Attempt to set again
@@ -103,6 +105,7 @@ public class Octree<T> {
 
     private void GrowTowards(Vector3i point)
     {
+        Debug.Log("GROWING! " + point + " " + System.Threading.Thread.CurrentThread.ManagedThreadId);
         // Add new entries to the dimension dictionaries
         CreateDimensionsAtLevel(root.Level + 1);
         // Find the direction of the point relative to the root
@@ -119,7 +122,7 @@ public class Octree<T> {
         yDirection = Convert.ToInt32(yDirection == 0);
         zDirection = Convert.ToInt32(zDirection == 0);
 
-        int cellsAccross = (int)cellsAccrossAtLevel[root.Level];
+        int cellsAccross = (int)halfCellsAccrossAtLevel[root.Level + 1];
 
         int rootMinX = ((xDirection) * cellsAccross); //+ (int)root.bounds.min.x;
         int rootMinY = ((yDirection) * cellsAccross); //+ (int)root.bounds.min.y;
@@ -127,7 +130,9 @@ public class Octree<T> {
 
         OctreeBodyNode<T> newRootNode = bodyNodePool.Catch();
 
-        newRootNode.ReInitialize(this, new Vector3i(rootMinX, rootMinY, rootMinZ), root.Level + 1);
+        newRootNode.ReInitialize(this, new Vector3i(0, 0, 0), root.Level + 1); // CANT EXPAND INTO NEGATIVES BECASUE MIN IS ALWAYS 000
+
+        Debug.Log("NEW ROOT" + newRootNode.bounds);
 
         newRootNode.PlaceChild(moveRootTo, root);
 

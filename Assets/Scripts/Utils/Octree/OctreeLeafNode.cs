@@ -96,9 +96,9 @@ public class OctreeLeafNode<T> : OctreeNode<T>
             Vector3i min = MinOfChildIndex((int)index);
 
             OctreeEntry<T> fish = treeBase.entryPool.Catch();
-            float halfX = treeBase.leafDimensions.x - 1;
-            float halfY = treeBase.leafDimensions.y - 1;
-            float halfZ = treeBase.leafDimensions.z - 1;
+            float halfX = treeBase.leafDimensions.x;
+            float halfY = treeBase.leafDimensions.y;
+            float halfZ = treeBase.leafDimensions.z;
 
             float minX = min.x * treeBase.leafDimensions.x;
             float minY = min.y * treeBase.leafDimensions.y;

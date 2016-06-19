@@ -60,6 +60,6 @@ public class Vector3i : IEquatable<Vector3i>
 
     public override int GetHashCode()
     {
-        return (int)(((uint) x) + (((uint)y) << 10) + (((uint)z) << 20));
+        return HashUtil.hash1(HashUtil.hash2(HashUtil.hash1(z) + y) + x);
     }
 }

@@ -20,7 +20,7 @@ public class BrickWorld : MonoBehaviour
 
     private Pool<ChunkFromOctreeRequest> extractRequestPool = new Pool<ChunkFromOctreeRequest>();
 
-    private Dictionary<string, Chunk> chunkDictionary = new Dictionary<string, Chunk>();
+    private Dictionary<int, Chunk> chunkDictionary = new Dictionary<int, Chunk>();
 
     private Grid3D<Brick> world;
 
@@ -34,8 +34,6 @@ public class BrickWorld : MonoBehaviour
 
 
     VoxelBrush setBrush, setAdjacentBrush, currentBrush;
-
-    int brush = 1;
 
     public void Start()
     {
@@ -136,18 +134,19 @@ public class BrickWorld : MonoBehaviour
         {
 
             Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
-            ChunkPool.Release(chunkDictionary[cell.ToString()]);
+            ChunkPool.Release(chunkDictionary[cell.GetHashCode()]);
             ChunkFromOctreeRequest request = extractRequestPool.Catch();
             Chunk chunk = request.ReInitialize(brickTree, extractor, material, cell.x / 16, cell.y / 16, cell.z / 16, extractRequestPool);
             requestHandlers.Grab().QueueRequest(request);
 
-            if(chunkDictionary.ContainsKey(cell.ToString()))
+            int hash = cell.GetHashCode();
+            if (chunkDictionary.ContainsKey(cell.GetHashCode()))
             {
-                chunkDictionary[cell.ToString()] = chunk;
+                chunkDictionary[cell.GetHashCode()] = chunk;
             }
             else
             {
-                chunkDictionary.Add(cell.ToString(), chunk);
+                chunkDictionary.Add(cell.GetHashCode(), chunk);
             }
 
         }
@@ -174,6 +173,6 @@ public class BrickWorld : MonoBehaviour
         ChunkFromOctreeRequest request = extractRequestPool.Catch();
         Chunk chunk = request.ReInitialize(brickTree, extractor, material, brickX, brickY, brickZ, extractRequestPool);
         requestHandlers.Grab().QueueRequest(request);
-        chunkDictionary.Add(new Vector3i(brickX * 16, brickY * 16, brickZ * 16).ToString(), chunk);
+        chunkDictionary.Add(new Vector3i(brickX * 16, brickY * 16, brickZ * 16).GetHashCode(), chunk);
     }
 }
