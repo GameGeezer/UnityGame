@@ -44,20 +44,7 @@ public class BrickTreeCacheFilter
         bricks.Clear();
     }
 
-    public byte GetVoxelAt(int x, int y, int z)
-    {
-        int localX = tree.FindLocalX(x);
-        int localY = tree.FindLocalY(y);
-        int localZ = tree.FindLocalZ(z);
 
-        int brickX = x / tree.BrickDimensionX ;
-        int brickY = y / tree.BrickDimensionY;
-        int brickZ = z / tree.BrickDimensionZ;
-
-        Brick brick = GetAt(brickX, brickY, brickZ);
-
-        return brick.GetValue(localX, localY, localZ);
-    }
 
     private string HashPosition(int x, int y, int z)
     {

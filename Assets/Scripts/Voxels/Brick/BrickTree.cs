@@ -47,9 +47,10 @@ public class BrickTree
         Vector3i dummyVec = new Vector3i();
         dummyVec.Set(x, y, z);
 
-        OctreeEntry<Brick> brickEntry = octree.GetAt(dummyVec);
+        Brick brick = null;
 
-        Brick brick = brickEntry == null ? null : brickEntry.entry;
+        brick = octree.GetAt(dummyVec);
+ 
 
         if (brick != null)
         {
@@ -62,9 +63,27 @@ public class BrickTree
 
         brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
 
-        octree.SetAt(dummyVec, brick);
+        lock (octree)
+        {
+            octree.SetAt(dummyVec, brick);
+        }
 
         return brick;
+    }
+
+    public byte GetVoxelAt(int x, int y, int z)
+    {
+        int localX = FindLocalX(x);
+        int localY = FindLocalY(y);
+        int localZ = FindLocalZ(z);
+
+        int brickX = x / BrickDimensionX;
+        int brickY = y / BrickDimensionY;
+        int brickZ = z / BrickDimensionZ;
+
+        Brick brick = GetAt(brickX, brickY, brickZ);
+
+        return brick.GetValue(localX, localY, localZ);
     }
 
     public int FindLocalX(int x)

@@ -18,7 +18,7 @@ public class SafeOctree<T>
         }
     }
 
-    public OctreeEntry<T> GetAt(Vector3i point)
+    public T GetAt(Vector3i point)
     {
         lock (octree)
         {

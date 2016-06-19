@@ -1,6 +1,9 @@
 ﻿
+using System;
+
 [System.Serializable]
-public class Vector3i {
+public class Vector3i : IEquatable<Vector3i>
+{
 
     public int x = 0, y = 0, z = 0;
 
@@ -48,5 +51,15 @@ public class Vector3i {
     public override string ToString()
     {
         return "x" + x + "y" + y + "z" + z;
+    }
+
+    public bool Equals(Vector3i other)
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
+
+    public override int GetHashCode()
+    {
+        return (int)(((uint) x) + (((uint)y) << 10) + (((uint)z) << 20));
     }
 }

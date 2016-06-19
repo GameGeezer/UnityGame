@@ -18,7 +18,6 @@ public class CubicChunkExtractor {
         int yOffset = brickTree.BrickDimensionY * brickWorld.y;
         int zOffset = brickTree.BrickDimensionZ * brickWorld.z;
 
-        BrickTreeCacheFilter cachedTree = new BrickTreeCacheFilter(brickTree);
         int normalDirection;
         for (int x = 0; x < brickTree.BrickDimensionX; ++x)
         {
@@ -30,10 +29,10 @@ public class CubicChunkExtractor {
                     int trueY = y + yOffset;
                     int trueZ = z + zOffset;
 
-                    VoxelMaterial voxel = materialAtlas.GetVoxelMaterial(cachedTree.GetVoxelAt(trueX, trueY, trueZ));
-                    VoxelMaterial voxelPlusX = materialAtlas.GetVoxelMaterial(cachedTree.GetVoxelAt(trueX + 1, trueY, trueZ));
-                    VoxelMaterial voxelPlusY = materialAtlas.GetVoxelMaterial(cachedTree.GetVoxelAt(trueX, trueY + 1, trueZ));
-                    VoxelMaterial voxelPlusZ = materialAtlas.GetVoxelMaterial(cachedTree.GetVoxelAt(trueX, trueY, trueZ + 1));
+                    VoxelMaterial voxel = materialAtlas.GetVoxelMaterial(brickTree.GetVoxelAt(trueX, trueY, trueZ));
+                    VoxelMaterial voxelPlusX = materialAtlas.GetVoxelMaterial(brickTree.GetVoxelAt(trueX + 1, trueY, trueZ));
+                    VoxelMaterial voxelPlusY = materialAtlas.GetVoxelMaterial(brickTree.GetVoxelAt(trueX, trueY + 1, trueZ));
+                    VoxelMaterial voxelPlusZ = materialAtlas.GetVoxelMaterial(brickTree.GetVoxelAt(trueX, trueY, trueZ + 1));
 
                     if (CheckForTransition(voxel, voxelPlusX, out normalDirection))
                     {
@@ -52,7 +51,6 @@ public class CubicChunkExtractor {
                 }
             }
         }
-        cachedTree.Clear();
     }
     
     public void Extract(Brick brick, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)

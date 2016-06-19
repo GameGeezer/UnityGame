@@ -16,6 +16,7 @@ public class Octree<T> {
 
     public Dictionary<int, float> cellsAccrossAtLevel = new Dictionary<int, float>();
     public Dictionary<int, float> halfCellsAccrossAtLevel = new Dictionary<int, float>();
+    public Dictionary<Vector3i, T> brickDictionary = new Dictionary<Vector3i, T>();
 
     public Octree(Vector3 leafDimensions, Vector3i startPosition)
     {
@@ -34,17 +35,17 @@ public class Octree<T> {
         root.RaycastFind(ray, found);
     }
 
-    public OctreeEntry<T> GetAt(Vector3i point)
+    public T GetAt(Vector3i point)
     {
-        if (root.Contains(point))
+        if (brickDictionary.ContainsKey(point))
         {
             // The cell lies within the tree's bounds
-            return root.GetAt(point);
+            return brickDictionary[point];
         }
         else
         {
             // The tree does not contain the cell
-            return default(OctreeEntry<T>);
+            return default(T);
         }
     }
 
@@ -53,6 +54,15 @@ public class Octree<T> {
         // The cell is within the current octree
         if (root.Contains(point))
         {
+            if(brickDictionary.ContainsKey(point))
+            {
+                brickDictionary[point] = value;
+            }
+            else
+            {
+                brickDictionary.Add(point, value);
+            }
+
             root.SetAt(point, value);
         }
         else
@@ -68,6 +78,11 @@ public class Octree<T> {
     {
         if (root.Contains(point))
         {
+            if (brickDictionary.ContainsKey(point))
+            {
+                brickDictionary.Remove(point);
+            }
+
             root.RemoveAt(point);
         }
     }
