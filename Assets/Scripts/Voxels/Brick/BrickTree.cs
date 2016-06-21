@@ -4,6 +4,7 @@ using UnityEngine;
 public class BrickTree
 {
     private SafeOctree<Brick> octree;
+
     private Noise2D noise;
     private BrickPool pool;
 
@@ -32,7 +33,7 @@ public class BrickTree
         pool = new BrickPool(new Vector3i(resolutionX, resolutionY, resolutionZ));
     }
 
-    public void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<Brick>> found)
+    public void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<Brick>, float> found)
     {
         octree.RayCastFind(ray, found);
     }
@@ -44,8 +45,7 @@ public class BrickTree
 
     public Brick GetAt(int x, int y, int z)
     {
-        Vector3i dummyVec = new Vector3i();
-        dummyVec.Set(x, y, z);
+        Vector3i dummyVec = new Vector3i(x, y, z);
 
         Brick brick = null;
 
@@ -66,7 +66,15 @@ public class BrickTree
 
         octree.SetAtIfNull(dummyVec, brick);
 
+
         return brick;
+    }
+
+    public Brick RemoveAt(int x, int y, int z)
+    {
+        Vector3i dummyVec = new Vector3i(x, y, z);
+
+        return octree.RemoveAt(dummyVec);
     }
 
     public byte GetVoxelAt(int x, int y, int z)
@@ -81,10 +89,7 @@ public class BrickTree
 
         Brick brick = GetAt(brickX, brickY, brickZ);
     
-        lock(brick)
-        {
-            return brick.GetValue(localX, localY, localZ);
-        }     
+        return brick.GetValue(localX, localY, localZ);  
     }
 
     public void SetVoxelAt(int x, int y, int z, byte value)
@@ -107,16 +112,16 @@ public class BrickTree
 
     public int FindLocalX(int x)
     {
-        return x % BrickDimensionX;
+        return x & (BrickDimensionX - 1);
     }
 
     public int FindLocalY(int y)
     {
-        return y % BrickDimensionY;
+        return y & (BrickDimensionY - 1);
     }
 
     public int FindLocalZ(int z)
     {
-        return z % BrickDimensionZ;
+        return z & (BrickDimensionZ - 1);
     }
 }

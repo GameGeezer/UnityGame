@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class SetVoxelAdjacentBrush : VoxelBrush
 {
-    private PriorityQueue<float, Vector3i> found = new PriorityQueue<float, Vector3i>();
+    private PriorityQueue<Vector3i, float> found = new PriorityQueue<Vector3i, float>();
 
     private Grid3DSelectBlackList<byte> selector = new Grid3DSelectBlackList<byte>();
 

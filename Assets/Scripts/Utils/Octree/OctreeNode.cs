@@ -37,13 +37,13 @@ public abstract class OctreeNode<T> {
         worldBounds.SetMinMax(new Vector3(min.x * treeBase.leafDimensions.x, min.y * treeBase.leafDimensions.y, min.z * treeBase.leafDimensions.z), new Vector3(maxX * treeBase.leafDimensions.x, maxY * treeBase.leafDimensions.y, maxZ * treeBase.leafDimensions.z));
     }
 
-    public abstract void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found);
+    public abstract void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<T>, float> found);
 
     public abstract OctreeEntry<T> GetAt(Vector3i point);
 
     public abstract void SetAt(Vector3i point, T value);
 
-    public abstract bool RemoveAt(Vector3i point);
+    public abstract bool RemoveAt(Vector3i point, out T entry);
 
     public abstract void Draw();
     

@@ -7,20 +7,28 @@ public class Octree<T> {
 
     public Vector3 leafDimensions { get; private set; }
 
+    public Pool<OctreeEntry<T>> entryPool { get; private set; }
+    public Pool<OctreeBodyNode<T>> bodyNodePool { get; private set; }
+    public Pool<OctreeLeafNode<T>> leafNodePool { get; private set; }
+
+    public Dictionary<int, float> cellsAccrossAtLevel { get; private set; }
+    public Dictionary<int, float> halfCellsAccrossAtLevel { get; private set; }
+
+    private Dictionary<Vector3i, T> quickieDictionary = new Dictionary<Vector3i, T>();
+
     private OctreeBodyNode<T> root;
-
-    public SafePool<OctreeEntry<T>> entryPool = new SafePool<OctreeEntry<T>>();
-    public SafePool<OctreeBodyNode<T>> bodyNodePool = new SafePool<OctreeBodyNode<T>>();
-    public SafePool<OctreeLeafNode<T>> leafNodePool = new SafePool<OctreeLeafNode<T>>();
-    public SafePool<Vector3> vector3Pool = new SafePool<Vector3>();
-
-    public Dictionary<int, float> cellsAccrossAtLevel = new Dictionary<int, float>();
-    public Dictionary<int, float> halfCellsAccrossAtLevel = new Dictionary<int, float>();
-    public Dictionary<Vector3i, T> brickDictionary = new Dictionary<Vector3i, T>();
 
     public Octree(Vector3 leafDimensions, Vector3i startPosition)
     {
         this.leafDimensions = leafDimensions;
+
+        entryPool = new Pool<OctreeEntry<T>>();
+        bodyNodePool = new Pool<OctreeBodyNode<T>>();
+        leafNodePool = new Pool<OctreeLeafNode<T>>();
+
+        cellsAccrossAtLevel = new Dictionary<int, float>();
+        halfCellsAccrossAtLevel = new Dictionary<int, float>();
+        
         // Maintain dimensions in the Octree to avoid dublicating throught the leaves
         CreateDimensionsAtLevel(0);
         CreateDimensionsAtLevel(1);
@@ -30,17 +38,17 @@ public class Octree<T> {
         root = rootNode.ReInitialize(this, startPosition, 1);    
     }
 
-    public void RayCastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
+    public void RayCastFind(Ray ray, PriorityQueue<OctreeEntry<T>, float> found)
     {
         root.RaycastFind(ray, found);
     }
 
     public T GetAt(Vector3i point)
     {
-        if (brickDictionary.ContainsKey(point))
+        if (quickieDictionary.ContainsKey(point))
         {
             // The cell lies within the tree's bounds
-            return brickDictionary[point];
+            return quickieDictionary[point];
         }
         else
         {
@@ -54,21 +62,19 @@ public class Octree<T> {
         // The cell is within the current octree
         if (root.Contains(point))
         {
-            if(brickDictionary.ContainsKey(point))
+            if(quickieDictionary.ContainsKey(point))
             {
-                brickDictionary[point] = value;
+                quickieDictionary[point] = value;
             }
             else
             {
-                brickDictionary.Add(point, value);
+                quickieDictionary.Add(point, value);
             }
 
             root.SetAt(point, value);
         }
         else
         {
-            Debug.Log("min: " + root.bounds.min + " max :" + root.bounds.max);
-            Debug.Log(point);
             // Grow the octree towards the cell
             GrowTowards(point);
             // Attempt to set again
@@ -76,17 +82,19 @@ public class Octree<T> {
         }
     }
 
-    public void RemoveAt(Vector3i point)
+    public T RemoveAt(Vector3i point)
     {
+        T removedEntry = default(T);
+        // Is the point within the tree
         if (root.Contains(point))
         {
-            if (brickDictionary.ContainsKey(point))
-            {
-                brickDictionary.Remove(point);
-            }
+            // Remove the point from the dictionary
+            quickieDictionary.Remove(point);
 
-            root.RemoveAt(point);
+            root.RemoveAt(point, out removedEntry);
         }
+
+        return removedEntry;
     }
 
     public void DrawWireFrame()
@@ -105,7 +113,6 @@ public class Octree<T> {
 
     private void GrowTowards(Vector3i point)
     {
-        Debug.Log("GROWING! " + point + " " + System.Threading.Thread.CurrentThread.ManagedThreadId);
         // Add new entries to the dimension dictionaries
         CreateDimensionsAtLevel(root.Level + 1);
         // Find the direction of the point relative to the root
@@ -131,8 +138,6 @@ public class Octree<T> {
         OctreeBodyNode<T> newRootNode = bodyNodePool.Catch();
 
         newRootNode.ReInitialize(this, new Vector3i(0, 0, 0), root.Level + 1); // CANT EXPAND INTO NEGATIVES BECASUE MIN IS ALWAYS 000
-
-        Debug.Log("NEW ROOT" + newRootNode.bounds);
 
         newRootNode.PlaceChild(moveRootTo, root);
 

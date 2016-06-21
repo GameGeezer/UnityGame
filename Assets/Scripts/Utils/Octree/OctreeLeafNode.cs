@@ -5,20 +5,16 @@ public class OctreeLeafNode<T> : OctreeNode<T>
 {
     private OctreeEntry<T>[] children = new OctreeEntry<T>[8];
 
-    public OctreeLeafNode()
+    public OctreeLeafNode<T> ReInitialize(Octree<T> treeBase, Vector3i min)
     {
-
-    }
-
-    public OctreeLeafNode<T> ReInitialize(Octree<T> treeBase, Vector3i center)
-    {
-        Initialize(treeBase, center, 0);
+        Initialize(treeBase, min, 0);
 
         return this;
     }
 
-    public override void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
+    public override void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<T>, float> found)
     {
+        // Does the ray intersect this node's bounds?
         if (!worldBounds.IntersectRay(ray))
         {
             return;
@@ -27,12 +23,13 @@ public class OctreeLeafNode<T> : OctreeNode<T>
         for (int i = 0; i < 8; ++i)
         {
             float distance;
-            if (children[i] == null || !children[i].bounds.IntersectRay(ray, out distance))
+            // Is there a child that the ray intersects?
+            if (children[i] == null || !children[i].IntersectRay(ray, out distance))
             {
                 continue;
             }
-
-            found.Enqueue(children[i], BrickConstants.LARGE_FLOAT - distance); // TODO propper priority
+            // Entry found, add it to the priority queue
+            found.Enqueue(children[i], BrickConstants.LARGE_FLOAT - distance);
         }
     }
 
@@ -50,14 +47,18 @@ public class OctreeLeafNode<T> : OctreeNode<T>
         SetChild(index, value);
     }
 
-    public override bool RemoveAt(Vector3i point)
+    public override bool RemoveAt(Vector3i point, out T entry)
     {
         OctreeChild index = ChildRelativeTo(point);
-
+        // There is no child at the index
         if (children[(int)index] == null)
         {
+            entry = default(T);
+
             return HasChildren();
         }
+
+        entry = children[(int)index].entry;
 
         RemoveChild(index);
 
@@ -66,7 +67,6 @@ public class OctreeLeafNode<T> : OctreeNode<T>
 
     public override void Draw()
     {
-   
         for (int i = 0; i < 8; ++i)
         {
             if (children[i] == null)
@@ -74,8 +74,7 @@ public class OctreeLeafNode<T> : OctreeNode<T>
                 continue;
             }
 
-            Gizmos.color = Color.blue;
-            Gizmos.DrawWireCube(children[i].bounds.center, children[i].bounds.extents * 2);
+            children[i].DrawWireFrame(Color.blue);
         }
 
         Gizmos.color = Color.yellow;
@@ -84,37 +83,33 @@ public class OctreeLeafNode<T> : OctreeNode<T>
 
     protected void SetChild(OctreeChild index, T node)
     {
-        if(node == null)
-        {
-            RemoveChild(index);
+        // WHAT hapens if node is null? perform a remove operation @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-            return;
-        }
-
+        // There is no OctreeEntry at the index
         if (children[(int)index] == null)
         {
-            Vector3i min = MinOfChildIndex((int)index);
-
+            // Fetch a new OctreeEntry
             OctreeEntry<T> fish = treeBase.entryPool.Catch();
-            float halfX = treeBase.leafDimensions.x;
-            float halfY = treeBase.leafDimensions.y;
-            float halfZ = treeBase.leafDimensions.z;
-
+            // Find the min of the new entry
+            Vector3i min = MinOfChildIndex((int)index);
+            // change the min from local to world space
             float minX = min.x * treeBase.leafDimensions.x;
             float minY = min.y * treeBase.leafDimensions.y;
             float minZ = min.z * treeBase.leafDimensions.z;
-
-            fish.ReInitialize(node, new Vector3(minX, minY, minZ), new Vector3(minX + halfX, minY + halfY, minZ + halfZ));
+            // Initialize the new node with world space bounds
+            fish.ReInitialize(node, min.x, min.y, min.z, new Vector3(minX, minY, minZ), new Vector3(minX + treeBase.leafDimensions.x, minY + treeBase.leafDimensions.y, minZ + treeBase.leafDimensions.z));
+            // Set index to the child
             children[(int)index] = fish;
-
+            // Increase the child counter
             ++childCount;
         }
-
+        // Set the OctryEnty's value to what was passed
         children[(int)index].entry = node;
     }
 
     protected void RemoveChild(OctreeChild index)
     {
+        // Decrement the number of children if an entry is affected
         if (children[(int)index] != null && children[(int)index].entry != null)
         {
             --childCount;

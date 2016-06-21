@@ -14,12 +14,12 @@ public class OctreeBodyNode<T> : OctreeNode<T>
     {
         Initialize(treeBase, min, level);
 
-        //TODO reset chilren
+        //TODO reset chilren @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
         return this;
     }
 
-    public override void RaycastFind(Ray ray, PriorityQueue<float, OctreeEntry<T>> found)
+    public override void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<T>, float> found)
     {
         if (!worldBounds.IntersectRay(ray))
         {
@@ -82,18 +82,18 @@ public class OctreeBodyNode<T> : OctreeNode<T>
         children[index].SetAt(point, value);
     }
 
-    public override bool RemoveAt(Vector3i point)
+    public override bool RemoveAt(Vector3i point, out T entry)
     {
         int index = (int)ChildRelativeTo(point);
 
         if (children[index] == null)
         {
+            entry = default(T);
+
             return HasChildren();
         }
 
-        bool childClear = children[index].RemoveAt(point);
-
-        if (childClear)
+        if (children[index].RemoveAt(point, out entry))
         {
             RemoveChild((OctreeChild)index);
         }

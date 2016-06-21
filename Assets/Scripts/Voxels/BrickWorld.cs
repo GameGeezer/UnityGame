@@ -89,6 +89,11 @@ public class BrickWorld : MonoBehaviour
             currentMaterial = dirt;
         }
 
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            Brick removed = brickTree.RemoveAt(0, 0, 0);
+        }
+
         if (!Input.GetMouseButtonDown(0))
         {
             return;
@@ -97,7 +102,7 @@ public class BrickWorld : MonoBehaviour
         
         GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
         Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
-        PriorityQueue<float, OctreeEntry<Brick>> found = new PriorityQueue<float, OctreeEntry<Brick>>();
+        PriorityQueue<OctreeEntry<Brick>, float> found = new PriorityQueue<OctreeEntry<Brick>, float>();
         lock(brickTree)
         {
             brickTree.RaycastFind(ray, found);
@@ -109,7 +114,7 @@ public class BrickWorld : MonoBehaviour
         bool hit = false;
         while (found.Count > 0 && !hit)
         {
-            PriorityQueue<float, Vector3i> out_found = new PriorityQueue<float, Vector3i>();
+            PriorityQueue<Vector3i, float> out_found = new PriorityQueue<Vector3i, float>();
             OctreeEntry<Brick> entry = found.Dequeue();
             cellSelector.Select(ray, entry.entry, entry.bounds.min, blackList, out_found);
             if(out_found.Count > 0)
@@ -136,7 +141,7 @@ public class BrickWorld : MonoBehaviour
             Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
             ChunkPool.Release(chunkDictionary[cell.GetHashCode()]);
             ChunkFromOctreeRequest request = extractRequestPool.Catch();
-            Chunk chunk = request.ReInitialize(brickTree, extractor, material, cell.x / 16, cell.y / 16, cell.z / 16, extractRequestPool);
+            Chunk chunk = request.ReInitialize(brickTree, extractor, material, entryHit.cell.x, entryHit.cell.y, entryHit.cell.z, extractRequestPool);
             requestHandlers.Grab().QueueRequest(request);
 
             int hash = cell.GetHashCode();

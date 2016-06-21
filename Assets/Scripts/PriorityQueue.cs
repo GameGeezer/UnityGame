@@ -1,212 +1,134 @@
 ﻿using System;
-using System.Collections;
 
-public struct HeapEntry<PriorityType, T> where PriorityType : IComparable
+public class PriorityQueue<EntryType, ComparatorType> where ComparatorType : IComparable
 {
-    private T item;
-    private PriorityType priority;
+    public int Count { get; private set; }
 
-    public HeapEntry(T item, PriorityType priority)
-    {
-        this.item = item;
-        this.priority = priority;
-    }
+    private Pool<PriorityQueueBodyNode<EntryType, ComparatorType>> nodesPool = new Pool<PriorityQueueBodyNode<EntryType, ComparatorType>>();
 
-    public T Item
-    {
-        get { return item; }
-    }
+    private PriorityQueueTailNode<EntryType, ComparatorType> tail;
 
-    public PriorityType Priority
-    {
-        get { return priority; }
-    }
-
-    public void Clear()
-    {
-        item = default(T);
-        priority = default(PriorityType);
-    }
-}
-
-public class PriorityQueue<PriorityType, T> : ICollection where PriorityType : IComparable
-{
-    private int count, capacity, version;
-
-    private HeapEntry<PriorityType, T>[] heap;
+    private PriorityQueueHeadNode<EntryType, ComparatorType> head;
 
     public PriorityQueue()
     {
-        capacity = 15;
-        heap = new HeapEntry<PriorityType, T>[capacity];
-    }
+        tail = new PriorityQueueTailNode<EntryType, ComparatorType>();
 
-    public PriorityType PeekPriority()
-    {
-        return heap[0].Priority;
+        head = new PriorityQueueHeadNode<EntryType, ComparatorType>();
+
+        tail.next = head;
+
+        head.previous = tail;
     }
 
     public void Clear()
     {
-        while(count > 0)
+        tail.next = head;
+
+        head.previous = tail;
+    }
+
+    public void Enqueue(EntryType entry, ComparatorType comparator)
+    {
+        PriorityQueueBodyNode<EntryType, ComparatorType> fish = nodesPool.Catch();
+
+        fish.Initialize(entry, comparator);
+
+        tail.Bubble(fish);
+
+        ++Count;
+    }
+
+    public EntryType Dequeue()
+    {
+        if (Count == 0)
         {
-            Dequeue();
-        }
-    }
-
-    public T Dequeue()
-    {
-        if (count == 0)
-            throw new InvalidOperationException();
-
-        T result = heap[0].Item;
-
-        --count;
-        trickleDown(0, heap[count]);
-        heap[count].Clear();
-        ++version;
-        return result;
-    }
-
-    public void Enqueue(T item, PriorityType priority)
-    {
-        if (priority == null)
-            throw new ArgumentNullException("priority");
-        if (count == capacity)
-            growHeap();
-
-        ++count;
-        bubbleUp(count - 1, new HeapEntry<PriorityType, T>(item, priority));
-        ++version;
-    }
-
-    private void bubbleUp(int index, HeapEntry<PriorityType, T> he)
-    {
-        int parent = getParent(index);
-        // note: (index > 0) means there is a parent
-        while ((index > 0) &&
-              (heap[parent].Priority.CompareTo(he.Priority) < 0))
-        {
-            heap[index] = heap[parent];
-            index = parent;
-            parent = getParent(index);
-        }
-        heap[index] = he;
-    }
-
-    private int getLeftChild(int index)
-    {
-        return (index * 2) + 1;
-    }
-
-    private int getParent(int index)
-    {
-        return (index - 1) / 2;
-    }
-
-    private void growHeap()
-    {
-        capacity = (capacity * 2) + 1;
-        HeapEntry<PriorityType, T>[] newHeap = new HeapEntry<PriorityType, T>[capacity];
-        System.Array.Copy(heap, 0, newHeap, 0, count);
-        heap = newHeap;
-    }
-
-    private void trickleDown(int index, HeapEntry<PriorityType, T> he)
-    {
-        int child = getLeftChild(index);
-        while (child < count)
-        {
-            if (((child + 1) < count) && (heap[child].Priority.CompareTo(heap[child + 1].Priority) < 0))
-            {
-                child++;
-            }
-            heap[index] = heap[child];
-            index = child;
-            child = getLeftChild(index);
-        }
-        bubbleUp(index, he);
-    }
-
-
-
-    #region ICollection implementation
-    public int Count
-    {
-        get { return count; }
-    }
-
-    public void CopyTo(Array array, int index)
-    {
-        System.Array.Copy(heap, 0, array, index, count);
-    }
-
-    public object SyncRoot
-    {
-        get { return this; }
-    }
-
-    public bool IsSynchronized
-    {
-        get { return false; }
-    }
-    #endregion
-
-
-    #region IEnumerable implementation
-    public IEnumerator GetEnumerator()
-    {
-        return new PriorityQueueEnumerator<PriorityType, T>(this);
-    }
-    #endregion
-
-    #region Priority Queue enumerator
-    private class PriorityQueueEnumerator<PriorityType, T> : IEnumerator where PriorityType : IComparable
-    {
-        private int index;
-        private PriorityQueue<PriorityType, T> pq;
-        private int version;
-
-        public PriorityQueueEnumerator(PriorityQueue<PriorityType, T> pq)
-        {
-            this.pq = pq;
-            Reset();
+            return default(EntryType);
         }
 
-        private void checkVersion()
-        {
-            if (version != pq.version)
-                throw new InvalidOperationException();
-        }
+        PriorityQueueBodyNode<EntryType, ComparatorType> entry = (PriorityQueueBodyNode<EntryType, ComparatorType>)head.previous;
 
-        #region IEnumerator Members
+        entry.previous.next = head;
 
-        public void Reset()
-        {
-            index = -1;
-            version = pq.version;
-        }
+        head.previous = entry.previous;
 
-        public object Current
-        {
-            get
-            {
-                checkVersion();
-                return pq.heap[index].Item;
-            }
-        }
+        nodesPool.Release(entry);
 
-        public bool MoveNext()
-        {
-            checkVersion();
-            if (index + 1 == pq.count)
-                return false;
-            index++;
-            return true;
-        }
-
-        #endregion
+        return entry.item;
     }
-    #endregion
 
+    public ComparatorType PeekAtPriority()
+    {
+        if (Count == 0)
+        {
+            return default(ComparatorType);
+        }
+
+        PriorityQueueBodyNode<EntryType, ComparatorType> entry = (PriorityQueueBodyNode<EntryType, ComparatorType>)head.previous;
+
+        return entry.priority;
+    }
+}
+
+abstract class PriorityQueueNode<EntryType, ComparatorType> where ComparatorType : IComparable
+{
+    public PriorityQueueNode<EntryType, ComparatorType> next { get; set; }
+
+    public PriorityQueueNode<EntryType, ComparatorType> previous { get; set; }
+
+    public abstract void Bubble(PriorityQueueBodyNode<EntryType, ComparatorType> node);
+}
+
+class PriorityQueueTailNode<EntryType, ComparatorType> : PriorityQueueNode<EntryType, ComparatorType> where ComparatorType : IComparable
+{
+    public override void Bubble(PriorityQueueBodyNode<EntryType, ComparatorType> node)
+    {
+        next.Bubble(node);
+    }
+}
+
+class PriorityQueueHeadNode<EntryType, ComparatorType> : PriorityQueueNode<EntryType, ComparatorType> where ComparatorType : IComparable
+{
+    public override void Bubble(PriorityQueueBodyNode<EntryType, ComparatorType> node)
+    {
+        previous.next = node;
+
+        node.previous = previous;
+
+        node.next = this;
+
+        previous = node;
+    }
+}
+
+class PriorityQueueBodyNode<EntryType, ComparatorType> : PriorityQueueNode<EntryType, ComparatorType> where ComparatorType : IComparable
+{
+    public EntryType item { get; private set; }
+
+    public ComparatorType priority { get; protected set; }
+
+    public void Initialize(EntryType item, ComparatorType priority)
+    {
+        this.item = item;
+
+        this.priority = priority;
+    }
+
+    public override void Bubble(PriorityQueueBodyNode<EntryType, ComparatorType> node)
+    {
+        if (priority.CompareTo(node.priority) > 0)
+        {
+            previous.next = node;
+
+            node.previous = previous;
+
+            node.next = this;
+
+            previous = node;
+        }
+        else
+        {
+            next.Bubble(node);
+        }
+    }
 }
