@@ -13,8 +13,12 @@ public class Chunk
         gameObject.AddComponent<MeshRenderer>();
         gameObject.AddComponent<MeshFilter>();
         gameObject.AddComponent<ChunkBehavior>();
+        
         gameObject.GetComponent<ChunkBehavior>().chunk = this;
         gameObject.GetComponent<MeshFilter>().mesh = ChunkMesh;
+
+        gameObject.AddComponent<MeshCollider>();
+        gameObject.GetComponent<MeshCollider>().sharedMesh = ChunkMesh;
     }
 
     public void Clear()
@@ -28,5 +32,15 @@ public class Chunk
         gameObject.GetComponent<MeshRenderer>().material = material;
         
         gameObject.transform.Translate(x, y, z);
+    }
+
+    public void UpdateCollider(Vector3[] vertices, int[] triangles)
+    {
+        MeshCollider collider = gameObject.GetComponent<MeshCollider>();
+        collider.sharedMesh = null;
+        collider.sharedMesh = ChunkMesh;
+        collider.sharedMesh.vertices = vertices;
+        collider.sharedMesh.triangles = triangles;
+        collider.sharedMesh.RecalculateBounds();
     }
 }

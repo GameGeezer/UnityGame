@@ -40,9 +40,9 @@ public class BrickWorld : MonoBehaviour
 
         setBrush = new SetVoxelBrush();
         setAdjacentBrush = new SetVoxelAdjacentBrush();
-        air = new VoxelMaterial(new Color(1, 0, 1), StateOfMatter.GAS);
-        grass = new VoxelMaterial(new Color(0, 1, 0), StateOfMatter.SOLID);
-        dirt = new VoxelMaterial(new Color(1, 0.5f, 0.5f), StateOfMatter.SOLID);
+        air = new VoxelMaterial(new Color(0.9f, 0, 0.9f), StateOfMatter.GAS);
+        grass = new VoxelMaterial(new Color(0, 0.9f, 0), StateOfMatter.SOLID);
+        dirt = new VoxelMaterial(new Color(0.9f, 0.5f, 0.5f), StateOfMatter.SOLID);
         materialAtlas.AddVoxelMaterial(0, air);
         materialAtlas.AddVoxelMaterial(1, grass);
         materialAtlas.AddVoxelMaterial(2, dirt);

@@ -12,8 +12,6 @@ public abstract class VoxelBrush
 
     Grid3DSelectBlackList<byte> blackListSelector = new Grid3DSelectBlackList<byte>();
 
-    public abstract bool Stroke(Ray ray, Brick brick, Vector3 brickPosition, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList);
-
     public abstract bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks);
 
     protected OctreeEntry<Brick> FirstBrickIntersected(Ray ray, BrickTree tree, List<byte> blackList)
@@ -64,7 +62,6 @@ public abstract class VoxelBrush
                 neighbor.Set(cell.x, cell.y - 1, cell.z);
                 closestDistance = distance;
             }
-
         }
         if (CollisionUtil.IntersectsBounds(ray, cell.x, cell.y, cell.z, highX, highY, cell.z, out distance))
         {
@@ -73,7 +70,6 @@ public abstract class VoxelBrush
                 neighbor.Set(cell.x, cell.y, cell.z - 1);
                 closestDistance = distance;
             }
-
         }
         if (CollisionUtil.IntersectsBounds(ray, highX, cell.y, cell.z, highX, highY, highZ, out distance))
         {

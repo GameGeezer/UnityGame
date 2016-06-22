@@ -17,7 +17,7 @@ public class CubicChunkExtractor {
         int xOffset = brickTree.BrickDimensionX * brickWorld.x;
         int yOffset = brickTree.BrickDimensionY * brickWorld.y;
         int zOffset = brickTree.BrickDimensionZ * brickWorld.z;
-
+        ColorUtil colorUtil = new ColorUtil();
         int normalDirection;
         for (int x = 0; x < brickTree.BrickDimensionX; ++x)
         {
@@ -36,51 +36,17 @@ public class CubicChunkExtractor {
 
                     if (CheckForTransition(voxel, voxelPlusX, out normalDirection))
                     {
-                        AddQuadX(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
+                        AddQuadX(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool, colorUtil);
                     }
 
                     if (CheckForTransition(voxel, voxelPlusY, out normalDirection))
                     {
-                        AddQuadY(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
+                        AddQuadY(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool, colorUtil);
                     }
 
                     if (CheckForTransition(voxel, voxelPlusZ, out normalDirection))
                     {
-                        AddQuadZ(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
-                    }
-                }
-            }
-        }
-    }
-    
-    public void Extract(Brick brick, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)
-    {
-        int normalDirection;
-        for (int x = 0; x < brick.GetWidth() - 1; ++x)
-        {
-            for (int y = 0; y < brick.GetHeight() - 1; ++y)
-            {
-                for (int z = 0; z < brick.GetDepth() - 1; ++z)
-                {
-
-                    VoxelMaterial voxel = materialAtlas.GetVoxelMaterial(brick.GetValue(x, y, z));
-                    VoxelMaterial voxelPlusX = materialAtlas.GetVoxelMaterial(brick.GetValue(x + 1, y, z));
-                    VoxelMaterial voxelPlusY = materialAtlas.GetVoxelMaterial(brick.GetValue(x, y + 1, z));
-                    VoxelMaterial voxelPlusZ = materialAtlas.GetVoxelMaterial(brick.GetValue(x, y, z + 1));
-
-                    if (CheckForTransition(voxel, voxelPlusX, out normalDirection))
-                    {
-                        AddQuadX(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
-                    }
-
-                    if (CheckForTransition(voxel, voxelPlusY, out normalDirection))
-                    {
-                        AddQuadY(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
-                    }
-
-                    if (CheckForTransition(voxel, voxelPlusZ, out normalDirection))
-                    {
-                        AddQuadZ(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
+                        AddQuadZ(voxel, x, y, z, normalDirection, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool, colorUtil);
                     }
                 }
             }
@@ -94,14 +60,22 @@ public class CubicChunkExtractor {
         return containsStart != (end.stateOfMatter == StateOfMatter.GAS);
     }
 
-    private void AddQuadX(VoxelMaterial voxel, int x, int y, int z, int normalDirection, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)
+    private void AddQuadX(VoxelMaterial voxel, int x, int y, int z, int normalDirection, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool, ColorUtil colorUtil)
     {
         int vertexIndex = vertices.Count;
 
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
+        Color color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
 
         Vector3 fish = vector3Pool.Catch();
         fish.Set(x + 1, y, z);
@@ -159,14 +133,22 @@ public class CubicChunkExtractor {
         }
     }
 
-    private void AddQuadY(VoxelMaterial voxel, int x, int y, int z, int normalDirection, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)
+    private void AddQuadY(VoxelMaterial voxel, int x, int y, int z, int normalDirection, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool, ColorUtil colorUtil)
     {
         int vertexIndex = vertices.Count;
 
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
+        Color color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.1f, 0.1f, 0.1f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.1f, 0.1f, 0.1f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.1f, 0.1f, 0.1f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.1f, 0.1f, 0.1f);
+        colors.Add(color);
 
         Vector3 fish = vector3Pool.Catch();
         fish.Set(x, y + 1, z);
@@ -225,14 +207,23 @@ public class CubicChunkExtractor {
         }
     }
 
-    private void AddQuadZ(VoxelMaterial voxel, int x, int y, int z, int normalDirection, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool)
+    private void AddQuadZ(VoxelMaterial voxel, int x, int y, int z, int normalDirection, ref List<Color> colors, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uv, ref List<int> indices, ref Pool<Color> colorPool, ref Pool<Vector2> vector2Pool, ref Pool<Vector3> vector3Pool, ColorUtil colorUtil)
     {
         int vertexIndex = vertices.Count;
 
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
-        colors.Add(voxel.color);
+
+        Color color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
+        color = colorPool.Catch();
+        colorUtil.Set(ref color, voxel.color, 0.7f, 0.1f, 0.4f);
+        colors.Add(color);
 
         Vector3 fish = vector3Pool.Catch();
         fish.Set(x, y, z + 1);

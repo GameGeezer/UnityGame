@@ -15,26 +15,6 @@ public class SetVoxelBrush : VoxelBrush
 
     }
 
-    public override bool Stroke(Ray ray, Brick brick, Vector3 brickPosition, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList)
-    {
-        found.Clear();
-
-        selector.Select(ray, brick, brickPosition, blackList, found);
-
-        if (found.Count == 0)
-        {
-            return false;
-        }
-
-        float distance = found.PeekAtPriority();
-
-        Vector3i cell = found.Dequeue();
-
-        brick.SetValue(cell.x, cell.y, cell.z, materialAtlas.GetMaterialId(voxelMaterial));
-
-        return true;
-    }
-
     public override bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks)
     {
         OctreeEntry<Brick> brickEntry = FirstBrickIntersected(ray, tree, blackList);

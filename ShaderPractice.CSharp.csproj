@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts\NoiseUtil.cs" />
     <Compile Include="Assets\Scripts\PriorityQueue.cs" />
     <Compile Include="Assets\Scripts\ThreadedQueue.cs" />
+    <Compile Include="Assets\Scripts\ColorUtil.cs" />
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3D.cs" />
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3DRaycastSelector.cs" />
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3DSelectBlackList.cs" />

@@ -75,6 +75,8 @@ class ChunkFromOctreeRequest : Request
         chunk.ChunkMesh.uv = uv.ToArray(); // add this line to the code here
         chunk.ChunkMesh.Optimize();
 
+        chunk.UpdateCollider(chunk.ChunkMesh.vertices, chunk.ChunkMesh.triangles);
+
         parentPool.Release(this);
     }
 }
