@@ -43,19 +43,18 @@ public class BrickTree
         octree.DrawWireFrame();
     }
 
-    public Brick GetAt(int x, int y, int z)
+    public OctreeEntry<Brick> GetAt(int x, int y, int z)
     {
         Vector3i dummyVec = new Vector3i(x, y, z);
 
-        Brick brick = null;
+        OctreeEntry<Brick> entry = octree.GetAt(dummyVec);
 
-        brick = octree.GetAt(dummyVec);
-
-        if (brick != null)
+        if (entry != null)
         {
-            return brick;
+            return entry;
         }
 
+        Brick brick;
         lock(pool)
         {
              brick = pool.Catch();
@@ -64,10 +63,9 @@ public class BrickTree
 
         brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
 
-        octree.SetAtIfNull(dummyVec, brick);
+        entry = octree.SetAtIfNull(dummyVec, brick);
 
-
-        return brick;
+        return entry;
     }
 
     public Brick RemoveAt(int x, int y, int z)
@@ -87,7 +85,7 @@ public class BrickTree
         int brickY = y / BrickDimensionY;
         int brickZ = z / BrickDimensionZ;
 
-        Brick brick = GetAt(brickX, brickY, brickZ);
+        Brick brick = GetAt(brickX, brickY, brickZ).entry;
     
         return brick.GetValue(localX, localY, localZ);  
     }
@@ -102,7 +100,7 @@ public class BrickTree
         int brickY = y / BrickDimensionY;
         int brickZ = z / BrickDimensionZ;
 
-        Brick brick = GetAt(brickX, brickY, brickZ);
+        Brick brick = GetAt(brickX, brickY, brickZ).entry;
 
         lock (brick)
         {

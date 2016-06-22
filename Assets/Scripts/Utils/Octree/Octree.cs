@@ -14,7 +14,7 @@ public class Octree<T> {
     public Dictionary<int, float> cellsAccrossAtLevel { get; private set; }
     public Dictionary<int, float> halfCellsAccrossAtLevel { get; private set; }
 
-    private Dictionary<Vector3i, T> quickieDictionary = new Dictionary<Vector3i, T>();
+    private Dictionary<Vector3i, OctreeEntry<T>> quickieDictionary = new Dictionary<Vector3i, OctreeEntry<T>>();
 
     private OctreeBodyNode<T> root;
 
@@ -43,7 +43,7 @@ public class Octree<T> {
         root.RaycastFind(ray, found);
     }
 
-    public T GetAt(Vector3i point)
+    public OctreeEntry<T> GetAt(Vector3i point)
     {
         if (quickieDictionary.ContainsKey(point))
         {
@@ -53,32 +53,34 @@ public class Octree<T> {
         else
         {
             // The tree does not contain the cell
-            return default(T);
+            return default(OctreeEntry<T>);
         }
     }
 
-    public void SetAt(Vector3i point, T value)
+    public OctreeEntry<T> SetAt(Vector3i point, T value)
     {
         // The cell is within the current octree
         if (root.Contains(point))
         {
-            if(quickieDictionary.ContainsKey(point))
+            OctreeEntry<T> entry = root.SetAt(point, value);
+
+            if (quickieDictionary.ContainsKey(point))
             {
-                quickieDictionary[point] = value;
+                quickieDictionary[point] = entry;
             }
             else
             {
-                quickieDictionary.Add(point, value);
+                quickieDictionary.Add(point, entry);
             }
 
-            root.SetAt(point, value);
+            return entry;
         }
         else
         {
             // Grow the octree towards the cell
             GrowTowards(point);
             // Attempt to set again
-            SetAt(point, value);
+            return SetAt(point, value);
         }
     }
 

@@ -6,7 +6,38 @@ using UnityEngine;
 
 public abstract class VoxelBrush
 {
+    private PriorityQueue<OctreeEntry<Brick>, float> entryPrioirityQueue = new PriorityQueue<OctreeEntry<Brick>, float>();
+
+    private PriorityQueue<Vector3i, float> cellPriorityQueue = new PriorityQueue<Vector3i, float>();
+
+    Grid3DSelectBlackList<byte> blackListSelector = new Grid3DSelectBlackList<byte>();
+
     public abstract bool Stroke(Ray ray, Brick brick, Vector3 brickPosition, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList);
+
+    public abstract bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks);
+
+    protected OctreeEntry<Brick> FirstBrickIntersected(Ray ray, BrickTree tree, List<byte> blackList)
+    {
+        entryPrioirityQueue.Clear();
+
+        tree.RaycastFind(ray, entryPrioirityQueue);
+        
+        while (!entryPrioirityQueue.IsEmpty())
+        {
+            cellPriorityQueue.Clear();
+
+            OctreeEntry<Brick> entry = entryPrioirityQueue.Dequeue();
+
+            blackListSelector.Select(ray, entry.entry, entry.bounds.min, blackList, cellPriorityQueue);
+
+            if (cellPriorityQueue.Count > 0)
+            {
+                return entry;
+            }
+        }
+
+        return null;
+    }
 
     protected Vector3i RayEntersCellFromCell(Ray ray, Vector3i cell, out float outDistance)
     {

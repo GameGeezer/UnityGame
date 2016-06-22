@@ -49,7 +49,7 @@ public class OctreeBodyNode<T> : OctreeNode<T>
         return children[index].GetAt(point);
     }
 
-    public override void SetAt(Vector3i point, T value)
+    public override OctreeEntry<T> SetAt(Vector3i point, T value)
     {
         int index = (int)ChildRelativeTo(point);
         // If the child index does not have a node
@@ -79,7 +79,7 @@ public class OctreeBodyNode<T> : OctreeNode<T>
             }
         }
         // The cell is in the child at index
-        children[index].SetAt(point, value);
+        return children[index].SetAt(point, value);
     }
 
     public override bool RemoveAt(Vector3i point, out T entry)

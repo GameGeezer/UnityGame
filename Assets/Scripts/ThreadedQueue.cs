@@ -4,25 +4,19 @@ using System.Collections.Generic;
 
 public class ThreadedQueue<TType>
 {
-    private Queue<TType> _queue;
-    private object _queueLock;
+    private Queue<TType> queue;
 
     public ThreadedQueue()
     {
-        _queue = new Queue<TType>();
-        _queueLock = new object();
+        queue = new Queue<TType>();
     }
 
     public void Enqueue(TType data)
     {
-        lock (_queueLock)
+        lock (queue)
         {
             // do not allow duplicates
-            if (!_queue.Contains(data))
-            {
-                _queue.Enqueue(data);
-            }
-
+            queue.Enqueue(data);
         }
     }
 
@@ -30,11 +24,11 @@ public class ThreadedQueue<TType>
     {
         data = default(TType);
         bool success = false;
-        lock (_queueLock)
+        lock (queue)
         {
-            if (_queue.Count > 0)
+            if (queue.Count > 0)
             {
-                data = _queue.Dequeue();
+                data = queue.Dequeue();
                 success = true;
             }
         }
@@ -43,9 +37,9 @@ public class ThreadedQueue<TType>
 
     public int Count()
     {
-        lock (_queueLock)
+        lock (queue)
         {
-            return _queue.Count;
+            return queue.Count;
         }
     }
 }

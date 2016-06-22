@@ -41,7 +41,7 @@ public abstract class OctreeNode<T> {
 
     public abstract OctreeEntry<T> GetAt(Vector3i point);
 
-    public abstract void SetAt(Vector3i point, T value);
+    public abstract OctreeEntry<T> SetAt(Vector3i point, T value);
 
     public abstract bool RemoveAt(Vector3i point, out T entry);
 

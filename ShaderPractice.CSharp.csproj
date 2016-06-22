@@ -68,7 +68,6 @@
     <Compile Include="Assets\Scripts\CameraBehavior.cs" />
     <Compile Include="Assets\Scripts\CollisionUtil.cs" />
     <Compile Include="Assets\Scripts\CraftHUD\MaterialScrollView.cs" />
-    <Compile Include="Assets\Scripts\EditBrick.cs" />
     <Compile Include="Assets\Scripts\GamePools.cs" />
     <Compile Include="Assets\Scripts\HashUtil.cs" />
     <Compile Include="Assets\Scripts\MainBehavior.cs" />
@@ -81,22 +80,19 @@
     <Compile Include="Assets\Scripts\Utils\Noise\Noise2D.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\Noise3D.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\PerlinHeightmap.cs" />
-    <Compile Include="Assets\Scripts\Utils\Octree\NF\SafeOctree.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\Octree.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeBodyNode.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeConstants.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeEntry.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeLeafNode.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\Octree\SafeOctree.cs" />
     <Compile Include="Assets\Scripts\Utils\Pool\Pool.cs" />
     <Compile Include="Assets\Scripts\Utils\Pool\SafePool.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\Request.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\RequestCircle.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\RequestHandler.cs" />
     <Compile Include="Assets\Scripts\Vector3i.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Atlas\Brushes\SetVoxelAdjacentBrush.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Atlas\Brushes\SetVoxelBrush.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Atlas\Brushes\VoxelBrush.cs" />
     <Compile Include="Assets\Scripts\Voxels\Atlas\StateOfMatter.cs" />
     <Compile Include="Assets\Scripts\Voxels\Atlas\VoxelMaterial.cs" />
     <Compile Include="Assets\Scripts\Voxels\Atlas\VoxelMaterialAtlas.cs" />
@@ -105,14 +101,14 @@
     <Compile Include="Assets\Scripts\Voxels\Brick\BrickPool.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brick\BrickTree.cs" />
     <Compile Include="Assets\Scripts\Voxels\BrickWorld.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brushes\SetVoxelAdjacentBrush.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brushes\SetVoxelBrush.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brushes\VoxelBrush.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\Chunk.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkBehavior.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkPool.cs" />
     <Compile Include="Assets\Scripts\Voxels\Extractors\CubicChunkExtractor.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Requests\ChunkFromBrickRequest.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Requests\ChunkFromGridWorld.cs" />
     <Compile Include="Assets\Scripts\Voxels\Requests\ChunkFromOctreeRequest.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Requests\ExtractChunkRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\TestMaterialShader.shader" />

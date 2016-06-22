@@ -1,5 +1,6 @@
 ﻿
 using System;
+using UnityEngine;
 
 [System.Serializable]
 public class Vector3i : IEquatable<Vector3i>
@@ -26,6 +27,11 @@ public class Vector3i : IEquatable<Vector3i>
         this.z = z;
 
         return this;
+    }
+
+    public static Vector3i operator +(Vector3i vec1, Vector3 vec2)
+    {
+        return new Vector3i(vec1.x + (int)vec2.x, vec1.y + (int)vec2.y, vec1.z + (int)vec2.z);
     }
 
     public static Vector3i operator +(Vector3i vec1, Vector3i vec2)

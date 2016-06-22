@@ -40,11 +40,11 @@ public class OctreeLeafNode<T> : OctreeNode<T>
         return children[(int)index];
     }
 
-    public override void SetAt(Vector3i point, T value)
+    public override OctreeEntry<T> SetAt(Vector3i point, T value)
     {
         OctreeChild index = ChildRelativeTo(point);
 
-        SetChild(index, value);
+        return SetChild(index, value);
     }
 
     public override bool RemoveAt(Vector3i point, out T entry)
@@ -81,7 +81,7 @@ public class OctreeLeafNode<T> : OctreeNode<T>
         Gizmos.DrawWireCube(worldBounds.center, worldBounds.extents * 2);
     }
 
-    protected void SetChild(OctreeChild index, T node)
+    protected OctreeEntry<T> SetChild(OctreeChild index, T node)
     {
         // WHAT hapens if node is null? perform a remove operation @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -105,6 +105,8 @@ public class OctreeLeafNode<T> : OctreeNode<T>
         }
         // Set the OctryEnty's value to what was passed
         children[(int)index].entry = node;
+
+        return children[(int)index];
     }
 
     protected void RemoveChild(OctreeChild index)

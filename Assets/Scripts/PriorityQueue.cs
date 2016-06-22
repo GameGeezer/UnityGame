@@ -26,6 +26,8 @@ public class PriorityQueue<EntryType, ComparatorType> where ComparatorType : ICo
         tail.next = head;
 
         head.previous = tail;
+
+        Count = 0;
     }
 
     public void Enqueue(EntryType entry, ComparatorType comparator)
@@ -54,7 +56,14 @@ public class PriorityQueue<EntryType, ComparatorType> where ComparatorType : ICo
 
         nodesPool.Release(entry);
 
+        --Count;
+
         return entry.item;
+    }
+
+    public bool IsEmpty()
+    {
+        return Count == 0;
     }
 
     public ComparatorType PeekAtPriority()

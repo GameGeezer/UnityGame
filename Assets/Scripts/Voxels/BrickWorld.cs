@@ -16,7 +16,7 @@ public class BrickWorld : MonoBehaviour
 
     private BrickTree brickTree;
 
-    private RequestCircle requestHandlers = new RequestCircle(8, 100);
+    private RequestCircle requestHandlers = new RequestCircle(4, 25);
 
     private Pool<ChunkFromOctreeRequest> extractRequestPool = new Pool<ChunkFromOctreeRequest>();
 
@@ -102,58 +102,40 @@ public class BrickWorld : MonoBehaviour
         
         GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
         Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
-        PriorityQueue<OctreeEntry<Brick>, float> found = new PriorityQueue<OctreeEntry<Brick>, float>();
-        lock(brickTree)
-        {
-            brickTree.RaycastFind(ray, found);
-        }
+
         
 
-        Grid3DSelectBlackList<byte> cellSelector = new Grid3DSelectBlackList<byte>();
-        OctreeEntry<Brick> entryHit = null;
-        bool hit = false;
-        while (found.Count > 0 && !hit)
+        Queue<OctreeEntry<Brick>> changed = new Queue<OctreeEntry<Brick>>();
+
+        if (currentBrush.Stroke(ray, brickTree, currentMaterial, materialAtlas, blackList, changed))
         {
-            PriorityQueue<Vector3i, float> out_found = new PriorityQueue<Vector3i, float>();
-            OctreeEntry<Brick> entry = found.Dequeue();
-            cellSelector.Select(ray, entry.entry, entry.bounds.min, blackList, out_found);
-            if(out_found.Count > 0)
+            while(changed.Count > 0)
             {
-                entryHit = entry;
-                hit = true;
+                OctreeEntry<Brick> entry = changed.Dequeue();
+
+                Vector3i cell = new Vector3i((int)entry.bounds.min.x, (int)entry.bounds.min.y, (int)entry.bounds.min.z);
+
+                Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
+
+                if (chunkDictionary.ContainsKey(cell.GetHashCode()))
+                {
+                    ChunkPool.Release(chunkDictionary[cell.GetHashCode()]);
+                }
+                
+                ChunkFromOctreeRequest request = extractRequestPool.Catch();
+                Chunk chunk = request.ReInitialize(brickTree, extractor, material, entry.cell.x, entry.cell.y, entry.cell.z, extractRequestPool);
+                requestHandlers.Grab().QueueRequest(request);
+
+                int hash = cell.GetHashCode();
+                if (chunkDictionary.ContainsKey(cell.GetHashCode()))
+                {
+                    chunkDictionary[cell.GetHashCode()] = chunk;
+                }
+                else
+                {
+                    chunkDictionary.Add(cell.GetHashCode(), chunk);
+                }
             }
-        }
-
-        if(!hit)
-        {
-            return;
-        }
-
-        Brick brick = entryHit.entry;
-
-
-
-        Vector3i cell = new Vector3i((int)entryHit.bounds.min.x, (int)entryHit.bounds.min.y, (int)entryHit.bounds.min.z);
-
-        if (currentBrush.Stroke(ray, brick, entryHit.bounds.min, currentMaterial, materialAtlas, blackList))
-        {
-
-            Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
-            ChunkPool.Release(chunkDictionary[cell.GetHashCode()]);
-            ChunkFromOctreeRequest request = extractRequestPool.Catch();
-            Chunk chunk = request.ReInitialize(brickTree, extractor, material, entryHit.cell.x, entryHit.cell.y, entryHit.cell.z, extractRequestPool);
-            requestHandlers.Grab().QueueRequest(request);
-
-            int hash = cell.GetHashCode();
-            if (chunkDictionary.ContainsKey(cell.GetHashCode()))
-            {
-                chunkDictionary[cell.GetHashCode()] = chunk;
-            }
-            else
-            {
-                chunkDictionary.Add(cell.GetHashCode(), chunk);
-            }
-
         }
         
     }

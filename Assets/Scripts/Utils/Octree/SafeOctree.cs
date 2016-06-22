@@ -12,39 +12,47 @@ public class SafeOctree<T>
 
     public void RayCastFind(Ray ray, PriorityQueue<OctreeEntry<T>, float> found)
     {
-        octree.RayCastFind(ray, found);
+        lock (octree)
+        {
+            octree.RayCastFind(ray, found);
+        }
     }
 
-    public T GetAt(Vector3i point)
+    public OctreeEntry<T> GetAt(Vector3i point)
     {
-        return octree.GetAt(point);
+        lock(octree)
+        {
+            return octree.GetAt(point);
+        }     
     }
 
     public void SetAt(Vector3i point, T value)
     {
-        lock(this)
+        lock(octree)
         {
             octree.SetAt(point, value);
         }
     }
 
 
-    public void SetAtIfNull(Vector3i point, T value)
+    public OctreeEntry<T> SetAtIfNull(Vector3i point, T value)
     {
-        lock (this)
+        lock (octree)
         {
-            T stored = GetAt(point);
+            OctreeEntry<T> stored = GetAt(point);
 
             if(stored == null)
             {
-                octree.SetAt(point, value);
+                stored = octree.SetAt(point, value);
             }
+
+            return stored;
         }
     }
 
     public T RemoveAt(Vector3i point)
     {
-        lock(this)
+        lock(octree)
         {
             return octree.RemoveAt(point);
         }
