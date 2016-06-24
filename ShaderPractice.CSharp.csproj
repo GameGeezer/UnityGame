@@ -66,21 +66,31 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\CameraBehavior.cs" />
-    <Compile Include="Assets\Scripts\CollisionUtil.cs" />
     <Compile Include="Assets\Scripts\CraftHUD\MaterialScrollView.cs" />
-    <Compile Include="Assets\Scripts\GamePools.cs" />
-    <Compile Include="Assets\Scripts\HashUtil.cs" />
     <Compile Include="Assets\Scripts\MainBehavior.cs" />
-    <Compile Include="Assets\Scripts\NoiseUtil.cs" />
-    <Compile Include="Assets\Scripts\PriorityQueue.cs" />
-    <Compile Include="Assets\Scripts\ThreadedQueue.cs" />
-    <Compile Include="Assets\Scripts\ColorUtil.cs" />
+    <Compile Include="Assets\Scripts\Pathfinding\Path.cs" />
+    <Compile Include="Assets\Scripts\Pathfinding\PathfindingGraph.cs" />
+    <Compile Include="Assets\Scripts\Pathfinding\PathfindingGraphNode.cs" />
+    <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Utils\CollisionUtil.cs" />
+    <Compile Include="Assets\Scripts\Utils\ColorUtil.cs" />
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3D.cs" />
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3DRaycastSelector.cs" />
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3DSelectBlackList.cs" />
+    <Compile Include="Assets\Scripts\Utils\HashUtil.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDComparerers.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDTree.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeBodyNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeEntry.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeLeafNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\Morton\Morton30.cs" />
+    <Compile Include="Assets\Scripts\Utils\Morton\Morton64.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\Noise2D.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\Noise3D.cs" />
+    <Compile Include="Assets\Scripts\Utils\Noise\NoiseUtil.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\PerlinHeightmap.cs" />
+    <Compile Include="Assets\Scripts\Utils\Noise\WorleyNoise2D.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\Octree.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeBodyNode.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeConstants.cs" />
@@ -90,10 +100,12 @@
     <Compile Include="Assets\Scripts\Utils\Octree\SafeOctree.cs" />
     <Compile Include="Assets\Scripts\Utils\Pool\Pool.cs" />
     <Compile Include="Assets\Scripts\Utils\Pool\SafePool.cs" />
+    <Compile Include="Assets\Scripts\Utils\Queues\PriorityQueue.cs" />
+    <Compile Include="Assets\Scripts\Utils\Queues\ThreadedQueue.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\Request.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\RequestCircle.cs" />
     <Compile Include="Assets\Scripts\Utils\Requests\RequestHandler.cs" />
-    <Compile Include="Assets\Scripts\Vector3i.cs" />
+    <Compile Include="Assets\Scripts\Utils\Vector3i.cs" />
     <Compile Include="Assets\Scripts\Voxels\Atlas\StateOfMatter.cs" />
     <Compile Include="Assets\Scripts\Voxels\Atlas\VoxelMaterial.cs" />
     <Compile Include="Assets\Scripts\Voxels\Atlas\VoxelMaterialAtlas.cs" />
@@ -109,6 +121,7 @@
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkBehavior.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkPool.cs" />
     <Compile Include="Assets\Scripts\Voxels\Extractors\CubicChunkExtractor.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Extractors\GreedyCubicChunkExtractor.cs" />
     <Compile Include="Assets\Scripts\Voxels\Requests\ChunkFromOctreeRequest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -9,17 +9,11 @@ public class ChunkPool
 
     public static Chunk Catch()
     {
-        lock(pool)
-        {
-            return pool.Catch();
-        }
+        return pool.Catch();
     }
 
     public static void Release(Chunk chunk)
     {
-        lock(pool)
-        {
-            pool.Release(chunk);
-        }
+        pool.Release(chunk);
     }
 }

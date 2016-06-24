@@ -22,9 +22,11 @@ public class BrickWorld : MonoBehaviour
 
     private Dictionary<int, Chunk> chunkDictionary = new Dictionary<int, Chunk>();
 
-    private Grid3D<Brick> world;
-
     private List<byte> blackList = new List<byte>();
+
+    private Pool<Chunk> chunkPool = new Pool<Chunk>();
+
+    PathfindingGraph pathFindingGraph;
 
     VoxelMaterial air;
     VoxelMaterial grass;
@@ -49,19 +51,36 @@ public class BrickWorld : MonoBehaviour
 
         blackList.Add(0);
 
-        world = new Grid3D<Brick>(worldDimensions.x, worldDimensions.y, worldDimensions.z);
-
         extractor = new CubicChunkExtractor(materialAtlas);
 
         Noise2D noise = new PerlinHeightmap(scale, magnitude, 1);
         brickTree = new BrickTree(brickDimensions.x, brickDimensions.y, brickDimensions.z, noise);
+
+        pathFindingGraph = new PathfindingGraph();
+        
+
+        pathFindingGraph.Refresh();
+
+        Path path = pathFindingGraph.FindPath(new Vector3(2, 16, 2), new Vector3(30, 16, 18));
+
+        while (path.HasNext())
+        {
+            path.GetNext().color = Color.green;
+        }
+        
 
         createAll();
     }
 
     public void OnDrawGizmos()
     {
-        brickTree.DrawWireFrame();
+        if(brickTree != null && pathFindingGraph != null)
+        {
+            brickTree.DrawWireFrame();
+
+            pathFindingGraph.DrawGizmos();
+        }
+        
     }
 
     public void Update()
@@ -119,11 +138,11 @@ public class BrickWorld : MonoBehaviour
 
                 if (chunkDictionary.ContainsKey(cell.GetHashCode()))
                 {
-                    ChunkPool.Release(chunkDictionary[cell.GetHashCode()]);
+                    chunkPool.Release(chunkDictionary[cell.GetHashCode()]);
                 }
                 
                 ChunkFromOctreeRequest request = extractRequestPool.Catch();
-                Chunk chunk = request.ReInitialize(brickTree, extractor, material, entry.cell.x, entry.cell.y, entry.cell.z, extractRequestPool);
+                Chunk chunk = request.ReInitialize(brickTree, extractor, material, entry.cell.x, entry.cell.y, entry.cell.z, chunkPool, extractRequestPool);
                 requestHandlers.Grab().QueueRequest(request);
 
                 int hash = cell.GetHashCode();
@@ -158,7 +177,7 @@ public class BrickWorld : MonoBehaviour
     {
         Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
         ChunkFromOctreeRequest request = extractRequestPool.Catch();
-        Chunk chunk = request.ReInitialize(brickTree, extractor, material, brickX, brickY, brickZ, extractRequestPool);
+        Chunk chunk = request.ReInitialize(brickTree, extractor, material, brickX, brickY, brickZ, chunkPool, extractRequestPool);
         requestHandlers.Grab().QueueRequest(request);
         chunkDictionary.Add(new Vector3i(brickX * 16, brickY * 16, brickZ * 16).GetHashCode(), chunk);
     }

@@ -10,7 +10,7 @@ public abstract class VoxelBrush
 
     private PriorityQueue<Vector3i, float> cellPriorityQueue = new PriorityQueue<Vector3i, float>();
 
-    Grid3DSelectBlackList<byte> blackListSelector = new Grid3DSelectBlackList<byte>();
+    private Grid3DSelectBlackList<byte> blackListSelector = new Grid3DSelectBlackList<byte>();
 
     public abstract bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks);
 
@@ -37,9 +37,8 @@ public abstract class VoxelBrush
         return null;
     }
 
-    protected Vector3i RayEntersCellFromCell(Ray ray, Vector3i cell, out float outDistance)
+    protected void RayEntersCellFromCell(Ray ray, Vector3i cell, Vector3i outCell, out float outDistance)
     {
-        Vector3i neighbor = GamePools.Vector3iPool.Catch();
         float closestDistance = float.MaxValue;
         float distance;
 
@@ -51,7 +50,7 @@ public abstract class VoxelBrush
         {
             if (distance < closestDistance)
             {
-                neighbor.Set(cell.x - 1, cell.y, cell.z);
+                outCell.Set(cell.x - 1, cell.y, cell.z);
                 closestDistance = distance;
             }
         }
@@ -59,7 +58,7 @@ public abstract class VoxelBrush
         {
             if (distance < closestDistance)
             {
-                neighbor.Set(cell.x, cell.y - 1, cell.z);
+                outCell.Set(cell.x, cell.y - 1, cell.z);
                 closestDistance = distance;
             }
         }
@@ -67,7 +66,7 @@ public abstract class VoxelBrush
         {
             if (distance < closestDistance)
             {
-                neighbor.Set(cell.x, cell.y, cell.z - 1);
+                outCell.Set(cell.x, cell.y, cell.z - 1);
                 closestDistance = distance;
             }
         }
@@ -75,7 +74,7 @@ public abstract class VoxelBrush
         {
             if (distance < closestDistance)
             {
-                neighbor.Set(cell.x + 1, cell.y, cell.z);
+                outCell.Set(cell.x + 1, cell.y, cell.z);
                 closestDistance = distance;
             }
         }
@@ -84,7 +83,7 @@ public abstract class VoxelBrush
         {
             if (distance < closestDistance)
             {
-                neighbor.Set(cell.x, cell.y + 1, cell.z);
+                outCell.Set(cell.x, cell.y + 1, cell.z);
                 closestDistance = distance;
             }
         }
@@ -92,13 +91,11 @@ public abstract class VoxelBrush
         {
             if (distance < closestDistance)
             {
-                neighbor.Set(cell.x, cell.y, cell.z + 1);
+                outCell.Set(cell.x, cell.y, cell.z + 1);
                 closestDistance = distance;
             }
         }
 
         outDistance = closestDistance;
-
-        return neighbor;
     }
 }

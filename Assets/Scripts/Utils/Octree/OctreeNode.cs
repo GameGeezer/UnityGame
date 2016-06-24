@@ -13,6 +13,8 @@ public abstract class OctreeNode<T> {
 
     private Vector3 center = new Vector3();
 
+    private Vector3 dummy = new Vector3();
+
     public OctreeNode()
     {
         bounds = new Bounds();
@@ -50,13 +52,9 @@ public abstract class OctreeNode<T> {
 
     public bool Contains(Vector3i point)
     {
-        Vector3 fish = new Vector3();
+        dummy.Set(point.x, point.y, point.z);
 
-        fish.Set(point.x, point.y, point.z);
-
-        bool contains = bounds.Contains(fish);
-
-        //treeBase.vector3Pool.Release(fish);
+        bool contains = bounds.Contains(dummy);
 
         return contains;
     }

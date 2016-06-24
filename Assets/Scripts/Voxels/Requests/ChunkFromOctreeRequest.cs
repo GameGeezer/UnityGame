@@ -21,19 +21,23 @@ class ChunkFromOctreeRequest : Request
     private Vector3i brickCell;
 
     private Pool<ChunkFromOctreeRequest> parentPool;
+    private Pool<Chunk> chunkPool;
 
     public ChunkFromOctreeRequest()
     {
 
     }
 
-    public Chunk ReInitialize(BrickTree brickTree, CubicChunkExtractor extractor, Material material, int brickX, int brickY, int brickZ, Pool<ChunkFromOctreeRequest> parentPool)
+    public Chunk ReInitialize(BrickTree brickTree, CubicChunkExtractor extractor, Material material, int brickX, int brickY, int brickZ, Pool<Chunk> chunkPool, Pool<ChunkFromOctreeRequest> parentPool)
     {
         this.brickTree = brickTree;
         this.extractor = extractor;
         this.material = material;
+
+        this.chunkPool = chunkPool;
         this.parentPool = parentPool;
-        this.chunk = ChunkPool.Catch();
+
+        this.chunk = chunkPool.Catch();
 
         brickCell = new Vector3i(brickX, brickY, brickZ);
 
@@ -63,6 +67,8 @@ class ChunkFromOctreeRequest : Request
 
         if (vertices.Count == 0)
         {
+            chunkPool.Release(chunk);
+
             return;
         }
 
