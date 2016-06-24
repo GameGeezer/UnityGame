@@ -14,6 +14,8 @@ public class KDTree<T>
 
     public Pool<KDTreeLeafNode<T>> leafNodePol = new Pool<KDTreeLeafNode<T>>();
 
+    public Pool<KDTempNode<T>> tempNodePool = new Pool<KDTempNode<T>>();
+
     private Pool<KDTreeEntry<T>> entryPool = new Pool<KDTreeEntry<T>>();
 
     public List<KDTreeEntry<T>> entries = new List<KDTreeEntry<T>>();

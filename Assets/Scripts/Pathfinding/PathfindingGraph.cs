@@ -14,7 +14,7 @@ public class PathfindingGraph
 
     public PathfindingGraph()
     {
-        CreateGrid(32);
+        CreateGrid(64);
     }
 
     public Path FindPath(Vector3 from, Vector3 to)

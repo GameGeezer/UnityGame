@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using UnityEngine;
 
 public class Path
 {
@@ -10,6 +9,15 @@ public class Path
     public Path()
     {
 
+    }
+
+    public void DrawGizmos()
+    {
+        foreach(var node in nodes)
+        {
+            Gizmos.color = Color.magenta;
+            node.DrawGizmos();
+        }
     }
 
     public void AddNode(PathfindingGraphNode node)

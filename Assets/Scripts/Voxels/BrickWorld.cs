@@ -26,6 +26,8 @@ public class BrickWorld : MonoBehaviour
 
     private Pool<Chunk> chunkPool = new Pool<Chunk>();
 
+    Path path;
+
     PathfindingGraph pathFindingGraph;
 
     VoxelMaterial air;
@@ -61,12 +63,7 @@ public class BrickWorld : MonoBehaviour
 
         pathFindingGraph.Refresh();
 
-        Path path = pathFindingGraph.FindPath(new Vector3(2, 16, 2), new Vector3(30, 16, 18));
-
-        while (path.HasNext())
-        {
-            path.GetNext().color = Color.green;
-        }
+        path = pathFindingGraph.FindPath(new Vector3(30, 16, 20), new Vector3(10, 16, 60));
         
 
         createAll();
@@ -74,11 +71,13 @@ public class BrickWorld : MonoBehaviour
 
     public void OnDrawGizmos()
     {
-        if(brickTree != null && pathFindingGraph != null)
+        if(brickTree != null && pathFindingGraph != null && path != null)
         {
             brickTree.DrawWireFrame();
 
-            pathFindingGraph.DrawGizmos();
+            //pathFindingGraph.DrawGizmos();
+
+            path.DrawGizmos();
         }
         
     }

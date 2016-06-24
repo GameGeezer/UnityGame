@@ -79,11 +79,13 @@
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3DSelectBlackList.cs" />
     <Compile Include="Assets\Scripts\Utils\HashUtil.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDComparerers.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDTempNode.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTree.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeBodyNode.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeEntry.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeLeafNode.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\Requests\KDTreeCreateNodeRequest.cs" />
     <Compile Include="Assets\Scripts\Utils\Morton\Morton30.cs" />
     <Compile Include="Assets\Scripts\Utils\Morton\Morton64.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\Noise2D.cs" />

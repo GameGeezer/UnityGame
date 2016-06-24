@@ -9,8 +9,6 @@ public class PathfindingGraphNode
 
     private KDTree<PathfindingGraphNode> pathNodes = new KDTree<PathfindingGraphNode>();
 
-    public Color color = Color.magenta;
-
     public void Initialize(int x, int y, int z)
     {
         position.Set(x, y, z);
@@ -44,12 +42,6 @@ public class PathfindingGraphNode
 
     public void DrawGizmos()
     {
-        Gizmos.color = Color.yellow;
-
-        Gizmos.DrawSphere(position, 0.25f);
-
-        Gizmos.color = color;
-
         foreach (var node in pathNodes.entries)
         {
             Gizmos.DrawLine(position, node.position);
