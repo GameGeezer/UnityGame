@@ -11,13 +11,13 @@ public class OctreeEntry<T>
         cell = new Vector3i();
     }
 
-    public void ReInitialize(T entry, int cellX, int cellY, int cellZ, Vector3 min, Vector3 max)
+    public void Initialize(T entry, int cellX, int cellY, int cellZ, Vector3 min, Vector3 max)
     {
+        this.entry = entry;
+
         cell.Set(cellX, cellY, cellZ);
 
         bounds.SetMinMax(min, max);
-
-        this.entry = entry;
     }
 
     public bool IntersectRay(Ray ray, out float distance)
@@ -25,7 +25,7 @@ public class OctreeEntry<T>
         return bounds.IntersectRay(ray, out distance);
     }
 
-    public void DrawWireFrame(Color color)
+    public void DrawGizmos(Color color)
     {
         Gizmos.color = color;
         Gizmos.DrawWireCube(bounds.center, bounds.extents * 2);

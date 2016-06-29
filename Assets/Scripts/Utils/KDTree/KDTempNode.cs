@@ -12,4 +12,9 @@ public class KDTempNode<T> : KDTreeNode<T>
     {
         
     }
+
+    public override void Clear(KDTreePoolParty<T> poolParty)
+    {
+        
+    }
 }

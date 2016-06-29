@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,5 +19,10 @@ public class KDTreeLeafNode<T> : KDTreeNode<T>
     public override void Initialize(int startOrValue, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree)
     {
         this.index = startOrValue;
+    }
+
+    public override void Clear(KDTreePoolParty<T> poolParty)
+    {
+        poolParty.leafNodePool.Release(this);
     }
 }

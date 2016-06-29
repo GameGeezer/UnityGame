@@ -15,30 +15,30 @@ public class Brick : Grid3D<byte> {
 
     public void CleanEdges()
     {
-        int xEnd = GetWidth() - 1;
-        int yEnd = GetHeight() - 1;
-        int zEnd = GetDepth() - 1;
-        for (int x = 0; x < GetWidth(); ++x)
+        int xEnd = width - 1;
+        int yEnd = height - 1;
+        int zEnd = depth - 1;
+        for (int x = 0; x < width; ++x)
         {
-            for (int y = 0; y < GetHeight(); ++y)
+            for (int y = 0; y < height; ++y)
             {
                 SetValue(x, y, 0, 0);
                 SetValue(x, y, zEnd, 0);
             }
         }
 
-        for (int x = 0; x < GetWidth(); ++x)
+        for (int x = 0; x < width; ++x)
         {
-            for (int z = 0; z < GetDepth(); ++z)
+            for (int z = 0; z < depth; ++z)
             {
                 SetValue(x, 0, z, 0);
                 SetValue(x, yEnd, z, 0);
             }
         }
 
-        for (int y = 0; y < GetHeight(); ++y)
+        for (int y = 0; y < height; ++y)
         {
-            for (int z = 0; z < GetDepth(); ++z)
+            for (int z = 0; z < depth; ++z)
             {
                 SetValue(0, y, z, 0);
                 SetValue(xEnd, y, z, 0);
@@ -48,15 +48,15 @@ public class Brick : Grid3D<byte> {
 
     public void fillWithNoise(int offsetX, int offsetY, int offsetZ, Noise2D heightNoise)
     {
-        for (int x = 0; x < GetWidth(); ++x)
+        for (int x = 0; x < width; ++x)
         {
-            for (int z = 0; z < GetDepth(); ++z)
+            for (int z = 0; z < depth; ++z)
             {
-                int height = heightNoise.generate(offsetX + x, offsetZ + z);
+                int noiseHeight = heightNoise.generate(offsetX + x, offsetZ + z);
 
-                for (int y = 0; y < GetHeight(); ++y)
+                for (int y = 0; y < height; ++y)
                 {
-                    if (offsetY + y < height)
+                    if (offsetY + y < noiseHeight)
                     {
                         SetValue(x, y, z, 1);
                     }

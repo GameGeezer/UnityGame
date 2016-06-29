@@ -17,20 +17,49 @@ public abstract class KDBodyNode<T> : KDTreeNode<T>
     protected KDTreeNode<T>[] children = new KDTreeNode<T>[2];
 
     protected ChooseNodePointer[] nodeFunctions = new ChooseNodePointer[3];
+    protected CreateNodes[] creatNodeFunction = new CreateNodes[2];
 
     public KDBodyNode()
     {
         nodeFunctions[BODY_NODE_INDEX] = new ChooseNodePointer(ChooseBody);
         nodeFunctions[LEAF_NODE_INDEX] = new ChooseNodePointer(ChooseLeaf);
         nodeFunctions[TEMP_NODE_INDEX] = new ChooseNodePointer(ChooseTemp);
+
+        creatNodeFunction[0] = new CreateNodes(CreateNodesBodyNext);
+        creatNodeFunction[1] = new CreateNodes(CreateNodesTwoDifferent);
     }
 
-    protected int Sort(int start, int length, List<KDTreeEntry<T>> nodes, IComparer<KDTreeEntry<T>> comparerer)
+    public override void Initialize(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree)
     {
-        nodes.Sort(start, length, comparerer);
+        nodes.Sort(start, length, GetComparer());
 
-        return start + (int)(length / 2);
+        int meanIndex = start + (int)(length / 2);
+
+        mean = nodes[meanIndex].position.z;
+
+        int areTwoAndDifferent = Convert.ToInt32(IsThereTwoDifferent(start, length, nodes));
+
+        creatNodeFunction[areTwoAndDifferent](start, length, nodes, tree, meanIndex);
     }
+
+    protected void CreateNodesTwoDifferent(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree, int meanIndex)
+    {
+        KDTreeNode<T> leftLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
+
+        leftLeafNode.Initialize(start, 0, null, null);
+
+        children[0] = leftLeafNode;
+
+        KDTreeNode<T> rightLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
+
+        rightLeafNode.Initialize(start + 1, 0, null, null);
+
+        children[1] = rightLeafNode;
+
+        return;
+    }
+
+    protected abstract void CreateNodesBodyNext(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree, int meanIndex);
 
     protected void CreateSubNodes(int leftStart, int leftLength, int rightStart, int rightLength, List<KDTreeEntry<T>> nodes, KDTree<T> tree)
     {
@@ -69,6 +98,10 @@ public abstract class KDBodyNode<T> : KDTreeNode<T>
         children[isRightLengthZero] = children[LEFT_INDEX];
     }
 
+    protected abstract bool IsThereTwoDifferent(int start, int length, List<KDTreeEntry<T>> nodes);
+
+    protected abstract IComparer<KDTreeEntry<T>> GetComparer();
+
     protected abstract KDTreeNode<T> ChooseLeaf(KDTree<T> tree);
 
     protected abstract KDTreeNode<T> ChooseBody(KDTree<T> tree);
@@ -76,11 +109,13 @@ public abstract class KDBodyNode<T> : KDTreeNode<T>
     protected abstract KDTreeNode<T> ChooseTemp(KDTree<T> tree);
 
     protected delegate KDTreeNode<T> ChooseNodePointer(KDTree<T> tree);
+
+    protected delegate void CreateNodes(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree, int meanIndex);
 }
 
 public class KDBodyNodeX<T> : KDBodyNode<T>
 {
-    KDTreeSortXComparerer<T> comparerer = new KDTreeSortXComparerer<T>();
+    private static KDTreeSortXComparerer<T> comparerer = new KDTreeSortXComparerer<T>();
 
     public KDBodyNodeX()
     {
@@ -96,42 +131,42 @@ public class KDBodyNodeX<T> : KDBodyNode<T>
 
     protected override KDTreeNode<T> ChooseLeaf(KDTree<T> tree)
     {
-        return tree.leafNodePol.Catch();
+        return tree.poolParty.leafNodePool.Catch();
     }
 
     protected override KDTreeNode<T> ChooseBody(KDTree<T> tree)
     {
-        return tree.bodyNodeYPool.Catch();
+        return tree.poolParty.bodyNodeYPool.Catch();
     }
 
     protected override KDTreeNode<T> ChooseTemp(KDTree<T> tree)
     {
-        return tree.tempNodePool.Catch();
+        return tree.TEMP_INSTANCE;
     }
 
-    public override void Initialize(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree)
+    protected override bool IsThereTwoDifferent(int start, int length, List<KDTreeEntry<T>> nodes)
     {
-        int meanIndex = Sort(start, length, nodes, comparerer);
+        return length == 2 && (nodes[start].position.x != nodes[start + 1].position.x);
+    }
 
-        mean = nodes[meanIndex].position.x;
+    protected override IComparer<KDTreeEntry<T>> GetComparer()
+    {
+        return comparerer;
+    }
 
-        if (length == 2 && (nodes[start].position.x != nodes[start + 1].position.x))
-        {
-            KDTreeNode<T> leftLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
+    public override void Clear(KDTreePoolParty<T> poolParty)
+    {
+        children[LEFT_INDEX].Clear(poolParty);
 
-            leftLeafNode.Initialize(start, 0, null, null);
+        children[RIGHT_INDEX].Clear(poolParty);
 
-            children[0] = leftLeafNode;
+        poolParty.bodyNodeXPool.Release(this);
 
-            KDTreeNode<T> rightLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
+        mean = 0.0f;
+    }
 
-            rightLeafNode.Initialize(start + 1, 0, null, null);
-
-            children[1] = rightLeafNode;
-
-            return;
-        }
-
+    protected override void CreateNodesBodyNext(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree, int meanIndex)
+    {
         while (meanIndex > start && nodes[meanIndex - 1].position.x == nodes[meanIndex].position.x)
         {
             --meanIndex;
@@ -152,7 +187,7 @@ public class KDBodyNodeX<T> : KDBodyNode<T>
 
 public class KDBodyNodeY<T> : KDBodyNode<T>
 {
-    KDTreeSortYComparerer<T> comparerer = new KDTreeSortYComparerer<T>();
+    private static KDTreeSortYComparerer<T> comparerer = new KDTreeSortYComparerer<T>();
 
     public KDBodyNodeY()
     {
@@ -161,17 +196,22 @@ public class KDBodyNodeY<T> : KDBodyNode<T>
 
     protected override KDTreeNode<T> ChooseLeaf(KDTree<T> tree)
     {
-        return tree.leafNodePol.Catch();
+        return tree.poolParty.leafNodePool.Catch();
     }
 
     protected override KDTreeNode<T> ChooseBody(KDTree<T> tree)
     {
-        return tree.bodyNodeZPool.Catch();
+        return tree.poolParty.bodyNodeZPool.Catch();
     }
 
     protected override KDTreeNode<T> ChooseTemp(KDTree<T> tree)
     {
-        return tree.tempNodePool.Catch();
+        return tree.TEMP_INSTANCE;
+    }
+
+    protected override bool IsThereTwoDifferent(int start, int length, List<KDTreeEntry<T>> nodes)
+    {
+        return length == 2 && (nodes[start].position.y != nodes[start + 1].position.y);
     }
 
     public override int NearestNeighbor(Vector3 position)
@@ -181,31 +221,25 @@ public class KDBodyNodeY<T> : KDBodyNode<T>
         return children[index].NearestNeighbor(position);
     }
 
-    public override void Initialize(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree)
+    protected override IComparer<KDTreeEntry<T>> GetComparer()
     {
-        // Local mean index
-        int meanIndex = Sort(start, length, nodes, comparerer);
+        return comparerer;
+    }
 
-        mean = nodes[meanIndex].position.y;
+    public override void Clear(KDTreePoolParty<T> poolParty)
+    {
+        children[LEFT_INDEX].Clear(poolParty);
 
-        if (length == 2 && (nodes[start].position.y != nodes[start + 1].position.y))
-        {
-            KDTreeNode<T> leftLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
+        children[RIGHT_INDEX].Clear(poolParty);
 
-            leftLeafNode.Initialize(start, 0, null, null);
+        poolParty.bodyNodeYPool.Release(this);
 
-            children[0] = leftLeafNode;
+        mean = 0.0f;
+    }
 
-            KDTreeNode<T> rightLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
-
-            rightLeafNode.Initialize(start + 1, 0, null, null);
-
-            children[1] = rightLeafNode;
-
-            return;
-        }
-        // Shift the mean index left until all the duplicates are on the right
-        while (meanIndex > start && nodes[meanIndex - 1].position.y == nodes[ meanIndex].position.y)
+    protected override void CreateNodesBodyNext(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree, int meanIndex)
+    {
+        while (meanIndex > start && nodes[meanIndex - 1].position.y == nodes[meanIndex].position.y)
         {
             --meanIndex;
         }
@@ -225,7 +259,7 @@ public class KDBodyNodeY<T> : KDBodyNode<T>
 
 public class KDBodyNodeZ<T> : KDBodyNode<T>
 {
-    KDTreeSortZComparerer<T> comparerer = new KDTreeSortZComparerer<T>();
+    private static KDTreeSortZComparerer<T> comparerer = new KDTreeSortZComparerer<T>();
 
     public KDBodyNodeZ()
     {
@@ -234,17 +268,27 @@ public class KDBodyNodeZ<T> : KDBodyNode<T>
 
     protected override KDTreeNode<T> ChooseLeaf(KDTree<T> tree)
     {
-        return tree.leafNodePol.Catch();
+        return tree.poolParty.leafNodePool.Catch();
     }
 
     protected override KDTreeNode<T> ChooseBody(KDTree<T> tree)
     {
-        return tree.bodyNodeXPool.Catch();
+        return tree.poolParty.bodyNodeXPool.Catch();
     }
 
     protected override KDTreeNode<T> ChooseTemp(KDTree<T> tree)
     {
-        return tree.tempNodePool.Catch();
+        return tree.TEMP_INSTANCE;
+    }
+
+    protected override bool IsThereTwoDifferent(int start, int length, List<KDTreeEntry<T>> nodes)
+    {
+        return length == 2 && (nodes[start].position.z != nodes[start + 1].position.z);
+    }
+
+    protected override IComparer<KDTreeEntry<T>> GetComparer()
+    {
+        return comparerer;
     }
 
     public override int NearestNeighbor(Vector3 position)
@@ -254,30 +298,19 @@ public class KDBodyNodeZ<T> : KDBodyNode<T>
         return children[index].NearestNeighbor(position);
     }
 
-    public override void Initialize(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree)
+    public override void Clear(KDTreePoolParty<T> poolParty)
     {
+        children[LEFT_INDEX].Clear(poolParty);
 
-        int meanIndex = Sort(start, length, nodes, comparerer);
+        children[RIGHT_INDEX].Clear(poolParty);
 
-        mean = nodes[meanIndex].position.z;
+        poolParty.bodyNodeZPool.Release(this);
 
-        if (length == 2 && (nodes[start].position.z != nodes[start + 1].position.z))
-        {
-            KDTreeNode<T> leftLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
+        mean = 0.0f;
+    }
 
-            leftLeafNode.Initialize(start, 0, null, null);
-
-            children[0] = leftLeafNode;
-
-            KDTreeNode<T> rightLeafNode = nodeFunctions[LEAF_NODE_INDEX](tree);
-
-            rightLeafNode.Initialize(start + 1, 0, null, null);
-
-            children[1] = rightLeafNode;
-
-            return;
-        }
-
+    protected override void CreateNodesBodyNext(int start, int length, List<KDTreeEntry<T>> nodes, KDTree<T> tree, int meanIndex)
+    {
         while (meanIndex > start && nodes[meanIndex - 1].position.z == nodes[meanIndex].position.z)
         {
             --meanIndex;

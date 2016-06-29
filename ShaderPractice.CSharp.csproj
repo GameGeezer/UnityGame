@@ -65,13 +65,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\CameraBehavior.cs" />
+    <Compile Include="Assets\Scripts\Camera\CameraBehavior.cs" />
+    <Compile Include="Assets\Scripts\Camera\CameraSettings.cs" />
     <Compile Include="Assets\Scripts\CraftHUD\MaterialScrollView.cs" />
+    <Compile Include="Assets\Scripts\CraftHUD\VoxelEditor.cs" />
+    <Compile Include="Assets\Scripts\FreeFlyCamera.cs" />
     <Compile Include="Assets\Scripts\MainBehavior.cs" />
     <Compile Include="Assets\Scripts\Pathfinding\Path.cs" />
     <Compile Include="Assets\Scripts\Pathfinding\PathfindingGraph.cs" />
     <Compile Include="Assets\Scripts\Pathfinding\PathfindingGraphNode.cs" />
+    <Compile Include="Assets\Scripts\Pathfinding\SearchAlgorithm.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Utils\AABBI.cs" />
     <Compile Include="Assets\Scripts\Utils\CollisionUtil.cs" />
     <Compile Include="Assets\Scripts\Utils\ColorUtil.cs" />
     <Compile Include="Assets\Scripts\Utils\Grid3D\Grid3D.cs" />
@@ -85,21 +90,23 @@
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeEntry.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeLeafNode.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\KDTreeNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\KDTree\KDTreePoolParty.cs" />
     <Compile Include="Assets\Scripts\Utils\KDTree\Requests\KDTreeCreateNodeRequest.cs" />
     <Compile Include="Assets\Scripts\Utils\Morton\Morton30.cs" />
     <Compile Include="Assets\Scripts\Utils\Morton\Morton64.cs" />
+    <Compile Include="Assets\Scripts\Utils\Noise\FlatNoise.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\Noise2D.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\Noise3D.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\NoiseUtil.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\PerlinHeightmap.cs" />
     <Compile Include="Assets\Scripts\Utils\Noise\WorleyNoise2D.cs" />
-    <Compile Include="Assets\Scripts\Utils\Octree\Octree.cs" />
-    <Compile Include="Assets\Scripts\Utils\Octree\OctreeBodyNode.cs" />
-    <Compile Include="Assets\Scripts\Utils\Octree\OctreeConstants.cs" />
     <Compile Include="Assets\Scripts\Utils\Octree\OctreeEntry.cs" />
-    <Compile Include="Assets\Scripts\Utils\Octree\OctreeLeafNode.cs" />
-    <Compile Include="Assets\Scripts\Utils\Octree\OctreeNode.cs" />
-    <Compile Include="Assets\Scripts\Utils\Octree\SafeOctree.cs" />
+    <Compile Include="Assets\Scripts\Utils\Octree\PointerOctree\Octree.cs" />
+    <Compile Include="Assets\Scripts\Utils\Octree\PointerOctree\OctreeBodyNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\Octree\PointerOctree\OctreeConstants.cs" />
+    <Compile Include="Assets\Scripts\Utils\Octree\PointerOctree\OctreeLeafNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\Octree\PointerOctree\OctreeNode.cs" />
+    <Compile Include="Assets\Scripts\Utils\Octree\PointerOctree\SafeOctree.cs" />
     <Compile Include="Assets\Scripts\Utils\Pool\Pool.cs" />
     <Compile Include="Assets\Scripts\Utils\Pool\SafePool.cs" />
     <Compile Include="Assets\Scripts\Utils\Queues\PriorityQueue.cs" />
@@ -118,15 +125,17 @@
     <Compile Include="Assets\Scripts\Voxels\BrickWorld.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brushes\SetVoxelAdjacentBrush.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brushes\SetVoxelBrush.cs" />
+    <Compile Include="Assets\Scripts\Voxels\Brushes\SymmetricalSetVoxelAdjacent.cs" />
     <Compile Include="Assets\Scripts\Voxels\Brushes\VoxelBrush.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\Chunk.cs" />
     <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkBehavior.cs" />
-    <Compile Include="Assets\Scripts\Voxels\Chunk\ChunkPool.cs" />
     <Compile Include="Assets\Scripts\Voxels\Extractors\CubicChunkExtractor.cs" />
     <Compile Include="Assets\Scripts\Voxels\Extractors\GreedyCubicChunkExtractor.cs" />
     <Compile Include="Assets\Scripts\Voxels\Requests\ChunkFromOctreeRequest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Resources\ExtractCubicMesh.compute" />
+    <None Include="Assets\Resources\VoxelAtlas1.txt" />
     <None Include="Assets\Shaders\TestMaterialShader.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />

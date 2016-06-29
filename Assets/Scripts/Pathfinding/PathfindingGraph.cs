@@ -14,7 +14,7 @@ public class PathfindingGraph
 
     public PathfindingGraph()
     {
-        CreateGrid(64);
+        CreateGrid(16);
     }
 
     public Path FindPath(Vector3 from, Vector3 to)
@@ -48,6 +48,11 @@ public class PathfindingGraph
         nodeTree.Refresh();
     }
 
+    public void Clear()
+    {
+        nodeTree.Clear();
+    }
+
     public PathfindingGraphNode Get(Vector3i location)
     {
         return nodes[location];
@@ -75,22 +80,22 @@ public class PathfindingGraph
                 Place(x, 16, y);
             }
         }
-        
+        Vector3i dummy = new Vector3i();
         for (int x = 1; x < res - 1; ++x)
         {
             for (int y = 1; y < res - 1; ++y)
             {
-                PathfindingGraphNode node = Get(new Vector3i(x, 16, y));
+                PathfindingGraphNode node = Get(dummy.Set(x, 16, y));
 
-                node.LinkToNode(Get(new Vector3i(x - 1, 16, y - 1)));
-                node.LinkToNode(Get(new Vector3i(x - 1, 16, y)));
-                node.LinkToNode(Get(new Vector3i(x - 1, 16, y + 1)));
+                node.LinkToNode(Get(dummy.Set(x - 1, 16, y - 1)));
+                node.LinkToNode(Get(dummy.Set(x - 1, 16, y)));
+                node.LinkToNode(Get(dummy.Set(x - 1, 16, y + 1)));
 
-                node.LinkToNode(Get(new Vector3i(x, 16, y + 1)));
-                node.LinkToNode(Get(new Vector3i(x + 1, 16, y + 1)));
-                node.LinkToNode(Get(new Vector3i(x + 1, 16, y)));
-                node.LinkToNode(Get(new Vector3i(x + 1, 16, y - 1)));
-                node.LinkToNode(Get(new Vector3i(x, 16, y - 1)));
+                node.LinkToNode(Get(dummy.Set(x, 16, y + 1)));
+                node.LinkToNode(Get(dummy.Set(x + 1, 16, y + 1)));
+                node.LinkToNode(Get(dummy.Set(x + 1, 16, y)));
+                node.LinkToNode(Get(dummy.Set(x + 1, 16, y - 1)));
+                node.LinkToNode(Get(dummy.Set(x, 16, y - 1)));
 
                 node.Refresh();
             }

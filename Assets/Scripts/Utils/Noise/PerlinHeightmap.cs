@@ -12,7 +12,7 @@ public class PerlinHeightmap : Noise2D {
         this.exp = exp;
     }
 
-    public override int generate(int x, int y)
+    public override int generate(float x, float y)
     {
         return (int)(Mathf.Pow((Mathf.PerlinNoise(x / scale, y / scale) * mag), exp));
     }

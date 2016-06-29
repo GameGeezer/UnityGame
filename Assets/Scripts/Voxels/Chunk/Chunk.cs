@@ -24,6 +24,7 @@ public class Chunk
     public void Clear()
     {
         ChunkMesh.Clear();
+
         gameObject.transform.Translate(-gameObject.transform.position.x, -gameObject.transform.position.y, -gameObject.transform.position.z);
     }
 

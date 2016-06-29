@@ -22,17 +22,9 @@ public class BrickWorld : MonoBehaviour
 
     private Dictionary<int, Chunk> chunkDictionary = new Dictionary<int, Chunk>();
 
-    private List<byte> blackList = new List<byte>();
-
     private Pool<Chunk> chunkPool = new Pool<Chunk>();
 
-    Path path;
 
-    PathfindingGraph pathFindingGraph;
-
-    VoxelMaterial air;
-    VoxelMaterial grass;
-    VoxelMaterial dirt;
 
     VoxelMaterial currentMaterial;
 
@@ -44,88 +36,74 @@ public class BrickWorld : MonoBehaviour
 
         setBrush = new SetVoxelBrush();
         setAdjacentBrush = new SetVoxelAdjacentBrush();
-        air = new VoxelMaterial(new Color(0.9f, 0, 0.9f), StateOfMatter.GAS);
-        grass = new VoxelMaterial(new Color(0, 0.9f, 0), StateOfMatter.SOLID);
-        dirt = new VoxelMaterial(new Color(0.9f, 0.5f, 0.5f), StateOfMatter.SOLID);
-        materialAtlas.AddVoxelMaterial(0, air);
-        materialAtlas.AddVoxelMaterial(1, grass);
-        materialAtlas.AddVoxelMaterial(2, dirt);
 
-        blackList.Add(0);
+        materialAtlas.LoadFromFile("VoxelAtlas1");
 
         extractor = new CubicChunkExtractor(materialAtlas);
 
         Noise2D noise = new PerlinHeightmap(scale, magnitude, 1);
-        brickTree = new BrickTree(brickDimensions.x, brickDimensions.y, brickDimensions.z, noise);
-
-        pathFindingGraph = new PathfindingGraph();
-        
-
-        pathFindingGraph.Refresh();
-
-        path = pathFindingGraph.FindPath(new Vector3(30, 16, 20), new Vector3(10, 16, 60));
-        
+        brickTree = new BrickTree(brickDimensions, noise);
 
         createAll();
     }
 
     public void OnDrawGizmos()
     {
-        if(brickTree != null && pathFindingGraph != null && path != null)
+        if(brickTree != null)
         {
             brickTree.DrawWireFrame();
-
-            //pathFindingGraph.DrawGizmos();
-
-            path.DrawGizmos();
         }
         
     }
 
+
     public void Update()
     {
-
         requestHandlers.Update();
 
         
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             currentBrush = setBrush;
-            currentMaterial = air;
+            currentMaterial = materialAtlas.GetVoxelMaterial(0);
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             currentBrush = setAdjacentBrush;
-            currentMaterial = grass;
+            currentMaterial = materialAtlas.GetVoxelMaterial(1);
         }
 
 
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             currentBrush = setAdjacentBrush;
-            currentMaterial = dirt;
+            currentMaterial = materialAtlas.GetVoxelMaterial(2);
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            Brick removed = brickTree.RemoveAt(0, 0, 0);
+            currentBrush = setAdjacentBrush;
+            currentMaterial = materialAtlas.GetVoxelMaterial(3);
         }
 
-        if (!Input.GetMouseButtonDown(0))
+        if (!Input.GetMouseButton(0))
         {
             return;
         }
 
         
         GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
-        Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 
-        
+        Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 
         Queue<OctreeEntry<Brick>> changed = new Queue<OctreeEntry<Brick>>();
 
-        if (currentBrush.Stroke(ray, brickTree, currentMaterial, materialAtlas, blackList, changed))
+
+        Bounds bounds = new Bounds();
+        bounds.SetMinMax(new Vector3(0, 0, 0), new Vector3(worldDimensions.x, worldDimensions.y, worldDimensions.z));
+
+        if (currentBrush.Stroke(ray, brickTree, currentMaterial, materialAtlas, materialAtlas.airMaterials, changed, bounds))
         {
             while(changed.Count > 0)
             {
@@ -160,7 +138,7 @@ public class BrickWorld : MonoBehaviour
 
     public void createAll()
     {
-        for (int x = 0; x < worldDimensions.x; ++x)
+        for (int x = -1; x < worldDimensions.x; ++x)
         {
             for (int y = 0; y < worldDimensions.y; ++y)
             {

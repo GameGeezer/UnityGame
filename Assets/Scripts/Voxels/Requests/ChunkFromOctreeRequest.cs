@@ -58,7 +58,7 @@ class ChunkFromOctreeRequest : Request
 
     public void Perform()
     {
-        extractor.Extract(brickTree, brickCell, ref colors, ref vertices, ref normals, ref uv, ref indices, ref colorPool, ref vector2Pool, ref vector3Pool);
+        extractor.Extract(brickTree, brickCell, colors, vertices, normals, uv, indices, colorPool, vector2Pool, vector3Pool);
     }
 
     public void PostPerformance()

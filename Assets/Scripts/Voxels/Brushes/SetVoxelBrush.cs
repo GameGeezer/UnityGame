@@ -15,7 +15,7 @@ public class SetVoxelBrush : VoxelBrush
 
     }
 
-    public override bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks)
+    public override bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks, Bounds bounds)
     {
         OctreeEntry<Brick> brickEntry = FirstBrickIntersected(ray, tree, blackList);
 

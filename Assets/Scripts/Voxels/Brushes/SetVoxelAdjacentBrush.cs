@@ -12,16 +12,31 @@ public class SetVoxelAdjacentBrush : VoxelBrush
 
     private Vector3i dummyVector3i = new Vector3i();
 
-    public override bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks)
+    private Vector3 dummyVector3 = new Vector3();
+
+    public override bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks, Bounds bounds)
     {
+        // Find the brick intersected
         OctreeEntry<Brick> brickEntry = FirstBrickIntersected(ray, tree, blackList);
+        // If we can't find one return
+        if(brickEntry == null)
+        {
+            return false;
+        }
 
         Brick brick = brickEntry.entry;
 
         Vector3 brickPosition = brickEntry.bounds.min;
 
+        dummyVector3.Set(brickEntry.cell.x, brickEntry.cell.y, brickEntry.cell.z);
+        // Make sure the brick is within the legal paining bounds
+        if (!bounds.Contains(dummyVector3))
+        {
+           // return false;
+        }
+        // Clear the resused found queue
         found.Clear();
-
+        // Find which cells are intersected within the grid
         selector.Select(ray, brick, brickPosition, blackList, found);
 
         if (found.Count == 0)
@@ -35,10 +50,15 @@ public class SetVoxelAdjacentBrush : VoxelBrush
 
         float distance;
         RayEntersCellFromCell(offsetRay, firstIntersection, dummyVector3i, out distance);
+
         Vector3i adjacentLocal = dummyVector3i;
         Vector3i adjacentWorld = adjacentLocal + brickEntry.bounds.min;
 
-        tree.SetVoxelAt(adjacentWorld.x, adjacentWorld.y, adjacentWorld.z, materialAtlas.GetMaterialId(voxelMaterial));
+        if (adjacentLocal.x >= 0 && adjacentLocal.y >= 0 && adjacentLocal.z >= 0)
+        {
+            tree.SetVoxelAt(adjacentWorld.x, adjacentWorld.y, adjacentWorld.z, materialAtlas.GetMaterialId(voxelMaterial));
+        }
+        
 
         Vector3i cellModified = new Vector3i(adjacentWorld.x / tree.BrickDimensionX, adjacentWorld.y / tree.BrickDimensionY, adjacentWorld.z / tree.BrickDimensionZ);
 

@@ -2,26 +2,24 @@
 
 public class Morton30
 {
-    public UInt32 code { get; private set; }
-
-    public void Encode(UInt32 x, UInt32 y, UInt32 z)
+    public static UInt32 Encode(UInt32 x, UInt32 y, UInt32 z)
     {
-        code =  (SplitBy3(x) | (SplitBy3(y) << 1) | (SplitBy3(z) << 2));
+        return  (SplitBy3(x) | (SplitBy3(y) << 1) | (SplitBy3(z) << 2));
     }
 
-    public void Decode(out UInt32 x, out UInt32 y, out UInt32 z)
+    public static void Decode(UInt32 morton, out UInt32 x, out UInt32 y, out UInt32 z)
     {
-        x = CompactBy3(code);
-        y = CompactBy3(code >> 1);
-        z = CompactBy3(code >> 2);
+        x = CompactBy3(morton);
+        y = CompactBy3(morton >> 1);
+        z = CompactBy3(morton >> 2);
     }
 
-    public UInt32 HighestOrderBitDifferent(Morton30 other)
+    public static UInt32 HighestOrderBitDifferent(UInt32 morton1, UInt32 morton2)
     {
-        return HighestOrderBit(code ^ other.code);
+        return HighestOrderBit(morton1 ^ morton2);
     }
 
-    private UInt32 SplitBy3(UInt32 value)
+    private static UInt32 SplitBy3(UInt32 value)
     {
         value &= 0x000003ff;
         value |= (value << 16);
@@ -36,7 +34,7 @@ public class Morton30
         return value;
     }
 
-    private UInt32 CompactBy3(UInt32 value)
+    private static UInt32 CompactBy3(UInt32 value)
     {
         value &= 0x09249249;
         value |= (value >> 2);
@@ -51,7 +49,7 @@ public class Morton30
         return value;
     }
 
-    private UInt32 HighestOrderBit(UInt32 n)
+    private static UInt32 HighestOrderBit(UInt32 n)
     {
         n |= (n >> 1);
         n |= (n >> 2);

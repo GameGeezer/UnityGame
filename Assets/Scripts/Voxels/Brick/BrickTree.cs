@@ -16,21 +16,21 @@ public class BrickTree
     public int BrickDimensionY { get; private set; }
     public int BrickDimensionZ { get; private set; }
 
-    public BrickTree(int resolutionX, int resolutionY, int resolutionZ, Noise2D noise)
+    public BrickTree(Vector3i resolution, Noise2D noise)
     {
         this.noise = noise;
 
-        BrickDimensionX = (int)Math.Pow(2, resolutionX);
-        BrickDimensionY = (int)Math.Pow(2, resolutionY);
-        BrickDimensionZ = (int)Math.Pow(2, resolutionZ);
+        BrickDimensionX = (int)Math.Pow(2, resolution.x);
+        BrickDimensionY = (int)Math.Pow(2, resolution.y);
+        BrickDimensionZ = (int)Math.Pow(2, resolution.z);
 
-        octree = new SafeOctree<Brick>(new Vector3(BrickDimensionX, BrickDimensionY, BrickDimensionZ), new Vector3i(0, 0, 0));
+        octree = new SafeOctree<Brick>(new Vector3(BrickDimensionX, BrickDimensionY, BrickDimensionZ), new Vector3i(50, 1, 1));
 
         BrickAndModX = BrickDimensionX - 1;
         BrickAndModY = BrickDimensionY - 1;
         BrickAndModZ = BrickDimensionZ - 1;
 
-        pool = new BrickPool(new Vector3i(resolutionX, resolutionY, resolutionZ));
+        pool = new BrickPool(resolution);
     }
 
     public void RaycastFind(Ray ray, PriorityQueue<OctreeEntry<Brick>, float> found)
@@ -45,34 +45,19 @@ public class BrickTree
 
     public OctreeEntry<Brick> GetAt(int x, int y, int z)
     {
-        Vector3i dummyVec = new Vector3i(x, y, z);
+        OctreeEntry<Brick> entry = octree.GetAt(x, y, z);
 
-        OctreeEntry<Brick> entry = octree.GetAt(dummyVec);
-
-        if (entry != null)
+        if (entry != null )
         {
             return entry;
         }
 
-        Brick brick;
-        lock(pool)
-        {
-             brick = pool.Catch();
-        }
-       
-
-        brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
-
-        entry = octree.SetAtIfNull(dummyVec, brick);
-
-        return entry;
+        return AddBrickAt(x, y, z);
     }
 
     public Brick RemoveAt(int x, int y, int z)
     {
-        Vector3i dummyVec = new Vector3i(x, y, z);
-
-        return octree.RemoveAt(dummyVec);
+        return octree.RemoveAt(x, y, z);
     }
 
     public byte GetVoxelAt(int x, int y, int z)
@@ -121,5 +106,18 @@ public class BrickTree
     public int FindLocalZ(int z)
     {
         return z & (BrickDimensionZ - 1);
+    }
+
+    private OctreeEntry<Brick> AddBrickAt(int x, int y, int z)
+    {
+        Brick brick;
+        lock (pool)
+        {
+            brick = pool.Catch();
+        }
+
+        brick.fillWithNoise(x * BrickDimensionX, y * BrickDimensionY, z * BrickDimensionZ, noise);
+
+        return octree.SetAtIfNull(x, y, z, brick);
     }
 }

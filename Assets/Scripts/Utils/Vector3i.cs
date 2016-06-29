@@ -66,6 +66,11 @@ public class Vector3i : IEquatable<Vector3i>
 
     public override int GetHashCode()
     {
+        return x+ (y << 10) + (z << 20);
+    }
+
+    public static int Hash(int x, int y, int z)
+    {
         return x + (y << 10) + (z << 20);
     }
 }

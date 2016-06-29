@@ -12,7 +12,7 @@ public abstract class VoxelBrush
 
     private Grid3DSelectBlackList<byte> blackListSelector = new Grid3DSelectBlackList<byte>();
 
-    public abstract bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks);
+    public abstract bool Stroke(Ray ray, BrickTree tree, VoxelMaterial voxelMaterial, VoxelMaterialAtlas materialAtlas, List<byte> blackList, Queue<OctreeEntry<Brick>> outChangedBricks, Bounds bounds);
 
     protected OctreeEntry<Brick> FirstBrickIntersected(Ray ray, BrickTree tree, List<byte> blackList)
     {

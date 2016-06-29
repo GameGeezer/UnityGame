@@ -6,7 +6,7 @@ public class Grid3DSelectBlackList<T> : Grid3DRaycastSelector<T>
     public void Select(Ray ray, Grid3D<T> grid, Vector3 brickPosition, List<T> blackList, PriorityQueue<Vector3i, float> out_found)
     {
        // Ray offsetRay = new Ray(new Vector3(ray.origin.x - brickPosition.x, ray.origin.y - brickPosition.y, ray.origin.z - brickPosition.z), ray.direction);
-        RaycastFilledCellsBFHelper(ray, grid, blackList, out_found, brickPosition.x, brickPosition.y, brickPosition.z, grid.GetWidth(), grid.GetHeight(), grid.GetDepth());
+        RaycastFilledCellsBFHelper(ray, grid, blackList, out_found, brickPosition.x, brickPosition.y, brickPosition.z, grid.width, grid.height, grid.depth);
     }
 
     private void RaycastFilledCellsBFHelper(Ray ray, Grid3D<T> brick, List<T> blackList, PriorityQueue<Vector3i, float> out_found, float x, float y, float z, int width, int height, int depth)

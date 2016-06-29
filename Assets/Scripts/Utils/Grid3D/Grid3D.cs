@@ -1,22 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 public class Grid3D<T> {
 
-    T[,,] data;
+    public T[,,] data;
+    public int width { get; private set; }
+    public int height { get; private set; }
+    public int depth { get; private set; }
 
     public Grid3D(int width, int height, int depth)
     {
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+
         data = new T[width, height, depth];
     }
 
     public void fill(T value)
     {
-        for(int x = 0; x < GetWidth(); ++x)
+        for(int x = 0; x < width; ++x)
         {
-            for (int y = 0; y < GetHeight(); ++y)
+            for (int y = 0; y < height; ++y)
             {
-                for (int z = 0; z < GetDepth(); ++z)
+                for (int z = 0; z < depth; ++z)
                 {
                     SetValue(x, y, z, value);
                 }
@@ -34,18 +42,8 @@ public class Grid3D<T> {
         data[x, y, z] = value;
     }
 
-    public int GetWidth()
+    public int DataSizeInBytes()
     {
-        return data.GetLength(0);
-    }
-
-    public int GetHeight()
-    {
-        return data.GetLength(1);
-    }
-
-    public int GetDepth()
-    {
-        return data.GetLength(2);
+        return Marshal.SizeOf(typeof(T)) * width * height * depth;
     }
 }

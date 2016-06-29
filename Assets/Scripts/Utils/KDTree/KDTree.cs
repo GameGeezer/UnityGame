@@ -6,17 +6,9 @@ using UnityEngine;
 
 public class KDTree<T>
 {
-    public Pool<KDBodyNodeX<T>> bodyNodeXPool = new Pool<KDBodyNodeX<T>>();
+    public KDTempNode<T> TEMP_INSTANCE = new KDTempNode<T>();
 
-    public Pool<KDBodyNodeY<T>> bodyNodeYPool = new Pool<KDBodyNodeY<T>>();
-
-    public Pool<KDBodyNodeZ<T>> bodyNodeZPool = new Pool<KDBodyNodeZ<T>>();
-
-    public Pool<KDTreeLeafNode<T>> leafNodePol = new Pool<KDTreeLeafNode<T>>();
-
-    public Pool<KDTempNode<T>> tempNodePool = new Pool<KDTempNode<T>>();
-
-    private Pool<KDTreeEntry<T>> entryPool = new Pool<KDTreeEntry<T>>();
+    public KDTreePoolParty<T> poolParty = new KDTreePoolParty<T>();
 
     public List<KDTreeEntry<T>> entries = new List<KDTreeEntry<T>>();
 
@@ -29,11 +21,18 @@ public class KDTree<T>
 
     public void Insert(T value, Vector3 position)
     {
-        KDTreeEntry<T> entry = entryPool.Catch();
+        KDTreeEntry<T> entry = poolParty.entryPool.Catch();
 
         entry.Initialize(position, value);
 
         entries.Add(entry);
+    }
+
+    public void Clear()
+    {
+        root.Clear(poolParty);
+
+        root = poolParty.bodyNodeXPool.Catch();
     }
 
     public void Refresh()
