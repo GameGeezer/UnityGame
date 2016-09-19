@@ -1,21 +1,25 @@
 ﻿#pragma kernel CSMain
 
-struct Triangle
+/*
+struct Quad
 {
-    float3 position[3];
+    float3 positions[4];
+	float3 normals[4];
+	float3 colors[4];
 };
 
-AppendStructuredBuffer<Triangle> triangles;
+AppendStructuredBuffer<Quad> quads;
 
 RWTexture2D<float4> Result;
 
 [numthreads(8,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-	Triangle polygon;
+	Quad polygon;
 	polygon.position[0] = float3(id.x, id.x, id.x);
 	polygon.position[1] = float3(id.x, id.x + 1, id.x);
     polygon.position[2] = float3(id.x, id.x, id.x + 1);
 
 	triangles.Append(polygon);
-}
+}`
+*/

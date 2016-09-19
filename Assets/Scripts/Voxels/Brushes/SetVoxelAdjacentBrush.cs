@@ -54,11 +54,13 @@ public class SetVoxelAdjacentBrush : VoxelBrush
         Vector3i adjacentLocal = dummyVector3i;
         Vector3i adjacentWorld = adjacentLocal + brickEntry.bounds.min;
 
-        if (adjacentLocal.x >= 0 && adjacentLocal.y >= 0 && adjacentLocal.z >= 0)
+        dummyVector3.Set(adjacentWorld.x, adjacentWorld.y, adjacentWorld.z);
+        if (!bounds.Contains(dummyVector3))
         {
-            tree.SetVoxelAt(adjacentWorld.x, adjacentWorld.y, adjacentWorld.z, materialAtlas.GetMaterialId(voxelMaterial));
+            return false;
         }
-        
+
+        tree.SetVoxelAt(adjacentWorld.x, adjacentWorld.y, adjacentWorld.z, materialAtlas.GetMaterialId(voxelMaterial));
 
         Vector3i cellModified = new Vector3i(adjacentWorld.x / tree.BrickDimensionX, adjacentWorld.y / tree.BrickDimensionY, adjacentWorld.z / tree.BrickDimensionZ);
 

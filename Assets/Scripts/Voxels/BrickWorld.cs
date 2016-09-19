@@ -138,7 +138,7 @@ public class BrickWorld : MonoBehaviour
 
     public void createAll()
     {
-        for (int x = -1; x < worldDimensions.x; ++x)
+        for (int x = 0; x < worldDimensions.x; ++x)
         {
             for (int y = 0; y < worldDimensions.y; ++y)
             {

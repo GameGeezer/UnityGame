@@ -1,4 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
+using Unity.IO.Compression;
 using UnityEngine;
 
 public class BrickTree
@@ -24,7 +29,7 @@ public class BrickTree
         BrickDimensionY = (int)Math.Pow(2, resolution.y);
         BrickDimensionZ = (int)Math.Pow(2, resolution.z);
 
-        octree = new SafeOctree<Brick>(new Vector3(BrickDimensionX, BrickDimensionY, BrickDimensionZ), new Vector3i(50, 1, 1));
+        octree = new SafeOctree<Brick>(new Vector3(BrickDimensionX, BrickDimensionY, BrickDimensionZ), new Vector3i(0, 0, 0));
 
         BrickAndModX = BrickDimensionX - 1;
         BrickAndModY = BrickDimensionY - 1;
@@ -55,9 +60,9 @@ public class BrickTree
         return AddBrickAt(x, y, z);
     }
 
-    public Brick RemoveAt(int x, int y, int z)
+    public void RemoveAt(int x, int y, int z)
     {
-        return octree.RemoveAt(x, y, z);
+        octree.RemoveAt(x, y, z);
     }
 
     public byte GetVoxelAt(int x, int y, int z)
@@ -91,6 +96,52 @@ public class BrickTree
         {
             brick.SetValue(localX, localY, localZ, value);
         }
+    }
+
+    public void Encode(string filePath)
+    {
+
+        MemoryStream brickStream = new MemoryStream();
+        DataContractSerializer cellSerializer = new DataContractSerializer(typeof(List<OctreeEntry<Brick>>));
+
+        List<OctreeEntry<Brick>> leafNodes = octree.GetLeafEnumerator();
+
+        cellSerializer.WriteObject(brickStream, leafNodes);
+
+        FileStream fileStream = File.Create(filePath);
+
+        brickStream.Position = 0;
+        CompressionUtil.ZipToFile(brickStream, fileStream);
+
+        fileStream.Close();
+        brickStream.Close();
+    }
+
+    public void Decode(string filePath)
+    {
+        DataContractSerializer cellSerializer = new DataContractSerializer(typeof(List<OctreeEntry<Brick>>));
+
+        FileStream fileStream = File.Open(filePath, FileMode.Open);
+        byte[] bytes = new byte[fileStream.Length];
+        fileStream.Read(bytes, 0, (int)fileStream.Length);
+        fileStream.Close();
+
+        using (var msi = new MemoryStream(bytes))
+        using (var mso = new MemoryStream())
+        {
+            using (var gs = new GZipStream(msi, CompressionMode.Decompress))
+            {
+                //gs.CopyTo(mso);
+                CompressionUtil.CopyTo(gs, mso);
+
+                mso.Seek(0, SeekOrigin.Begin);
+                List<OctreeEntry<Brick>> cell = (List<OctreeEntry<Brick>>)cellSerializer.ReadObject(mso);
+            }
+            
+
+            
+        }
+
     }
 
     public int FindLocalX(int x)

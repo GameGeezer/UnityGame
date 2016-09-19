@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2015
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShaderPractice.CSharp", "ShaderPractice.CSharp.csproj", "{3CAE913B-87AA-4BB8-8877-75353192B3BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShaderPractice.CSharp.Editor", "ShaderPractice.CSharp.Editor.csproj", "{61907CB7-CF01-DFA6-FBF2-C05E1B7D46D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{3CAE913B-87AA-4BB8-8877-75353192B3BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CAE913B-87AA-4BB8-8877-75353192B3BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CAE913B-87AA-4BB8-8877-75353192B3BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61907CB7-CF01-DFA6-FBF2-C05E1B7D46D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61907CB7-CF01-DFA6-FBF2-C05E1B7D46D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61907CB7-CF01-DFA6-FBF2-C05E1B7D46D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61907CB7-CF01-DFA6-FBF2-C05E1B7D46D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

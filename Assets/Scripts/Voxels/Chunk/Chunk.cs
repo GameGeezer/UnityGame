@@ -3,27 +3,34 @@ using System.Collections;
 
 public class Chunk
 {
-    private GameObject gameObject = new GameObject();
-
-    public Mesh ChunkMesh { get; set; }
+    public GameObject gameObject;
 
     public Chunk()
     {
-        ChunkMesh = new Mesh();
+        gameObject = new GameObject();
         gameObject.AddComponent<MeshRenderer>();
+        gameObject.GetComponent<MeshRenderer>().receiveShadows = true;
+        gameObject.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+
         gameObject.AddComponent<MeshFilter>();
+        gameObject.GetComponent<MeshFilter>().sharedMesh = new Mesh();
+
+
         gameObject.AddComponent<ChunkBehavior>();
-        
         gameObject.GetComponent<ChunkBehavior>().chunk = this;
-        gameObject.GetComponent<MeshFilter>().mesh = ChunkMesh;
 
         gameObject.AddComponent<MeshCollider>();
-        gameObject.GetComponent<MeshCollider>().sharedMesh = ChunkMesh;
+        gameObject.GetComponent<MeshCollider>().sharedMesh = gameObject.GetComponent<MeshFilter>().sharedMesh;
+    }
+
+    public Chunk(GameObject gameObject)
+    {
+        this.gameObject = gameObject;
     }
 
     public void Clear()
     {
-        ChunkMesh.Clear();
+        gameObject.GetComponent<MeshFilter>().sharedMesh.Clear();
 
         gameObject.transform.Translate(-gameObject.transform.position.x, -gameObject.transform.position.y, -gameObject.transform.position.z);
     }
@@ -31,7 +38,10 @@ public class Chunk
     public void Initialize(Material material, float x, float y, float z)
     {
         gameObject.GetComponent<MeshRenderer>().material = material;
-        
+
+
+
+
         gameObject.transform.Translate(x, y, z);
     }
 
@@ -39,9 +49,14 @@ public class Chunk
     {
         MeshCollider collider = gameObject.GetComponent<MeshCollider>();
         collider.sharedMesh = null;
-        collider.sharedMesh = ChunkMesh;
+        collider.sharedMesh = gameObject.GetComponent<MeshFilter>().sharedMesh;
         collider.sharedMesh.vertices = vertices;
         collider.sharedMesh.triangles = triangles;
         collider.sharedMesh.RecalculateBounds();
+    }
+
+    public Mesh GetMesh()
+    {
+        return gameObject.GetComponent<MeshFilter>().sharedMesh;
     }
 }

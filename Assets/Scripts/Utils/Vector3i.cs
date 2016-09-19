@@ -1,12 +1,22 @@
 ﻿
 using System;
+using System.Runtime.Serialization;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class Vector3i : IEquatable<Vector3i>
 {
+    [DataMember]
+    [SerializeField]
+    public int x = 0;
 
-    public int x = 0, y = 0, z = 0;
+    [DataMember]
+    [SerializeField]
+    public int y = 0;
+
+    [DataMember]
+    [SerializeField]
+    public int z = 0;
 
     public Vector3i()
     {

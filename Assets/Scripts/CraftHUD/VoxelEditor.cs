@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
+[SelectionBase]
+[ExecuteInEditMode]
 public class VoxelEditor : MonoBehaviour
 {
+    public string voxelAtlasFile;
+
     public Vector3i brickResolution = new Vector3i();
 
     public Vector3i worldDimensions = new Vector3i();
 
-    public string voxelAtlasFile;
+    public Vector3i maxDimensions = new Vector3i();
 
     private BrickTree voxelTree;
 
-    private VoxelMaterialAtlas materialAtlas = new VoxelMaterialAtlas();
+    public VoxelMaterialAtlas materialAtlas = new VoxelMaterialAtlas();
 
     private CubicChunkExtractor extractor;
 
@@ -25,13 +30,6 @@ public class VoxelEditor : MonoBehaviour
     private Pool<Chunk> chunkPool = new Pool<Chunk>();
 
 
-    VoxelMaterial currentMaterial;
-
-
-    VoxelBrush setBrush, setAdjacentBrush, currentBrush;
-
-    private bool symmetrical = false;
-
     public VoxelEditor()
     {
 
@@ -39,10 +37,12 @@ public class VoxelEditor : MonoBehaviour
 
     public void Start()
     {
-        Noise2D noise = new FlatNoise(1);
+        foreach (Transform child in this.gameObject.transform)
+        {
+            chunkPool.Release(new Chunk(child.gameObject));
+        }
 
-        setBrush = new SetVoxelBrush();
-        setAdjacentBrush = new SetVoxelAdjacentBrush();
+        Noise2D noise = new FlatNoise(2);
 
         materialAtlas.LoadFromFile(voxelAtlasFile);
 
@@ -51,85 +51,34 @@ public class VoxelEditor : MonoBehaviour
         extractor = new CubicChunkExtractor(materialAtlas);
 
         createAll();
+
+
     }
 
     public void Update()
     {
         requestHandlers.Update();
+    }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            currentBrush = setBrush;
-            currentMaterial = materialAtlas.GetVoxelMaterial(0);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            currentBrush = setAdjacentBrush;
-            currentMaterial = materialAtlas.GetVoxelMaterial(1);
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            currentBrush = setAdjacentBrush;
-            currentMaterial = materialAtlas.GetVoxelMaterial(2);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            currentBrush = setAdjacentBrush;
-            currentMaterial = materialAtlas.GetVoxelMaterial(3);
-        }
-
-        if (!Input.GetMouseButton(0))
-        {
-            return;
-        }
-
-
-        GameObject camera = GameObject.FindGameObjectsWithTag("Player")[0];
-
-        Ray ray = camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
-
+    public void PaintWithRay(Ray ray, VoxelBrush brush, VoxelMaterial material)
+    {
         Queue<OctreeEntry<Brick>> changed = new Queue<OctreeEntry<Brick>>();
 
         Bounds bounds = new Bounds();
-        bounds.SetMinMax(new Vector3(0, 0, 0), new Vector3(worldDimensions.x, worldDimensions.y, worldDimensions.z));
+        bounds.SetMinMax(new Vector3(1, 1, 1), new Vector3(maxDimensions.x * voxelTree.BrickDimensionX - 1, maxDimensions.y * voxelTree.BrickDimensionY - 1, maxDimensions.z * voxelTree.BrickDimensionZ - 1));
 
-        if (currentBrush.Stroke(ray, voxelTree, currentMaterial, materialAtlas, materialAtlas.airMaterials, changed, bounds))
+        if (brush.Stroke(ray, voxelTree, material, materialAtlas, materialAtlas.airMaterials, changed, bounds))
         {
             while (changed.Count > 0)
             {
                 OctreeEntry<Brick> entry = changed.Dequeue();
 
-                if(entry == null)
+                if (entry == null)
                 {
                     continue;
                 }
 
-                Vector3i cell = new Vector3i((int)entry.bounds.min.x, (int)entry.bounds.min.y, (int)entry.bounds.min.z);
-
-                Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
-
-                if (chunkDictionary.ContainsKey(cell.GetHashCode()))
-                {
-                    chunkPool.Release(chunkDictionary[cell.GetHashCode()]);
-                }
-
-                ChunkFromOctreeRequest request = extractRequestPool.Catch();
-                Chunk chunk = request.ReInitialize(voxelTree, extractor, material, entry.cell.x, entry.cell.y, entry.cell.z, chunkPool, extractRequestPool);
-                requestHandlers.Grab().QueueRequest(request);
-
-                int hash = cell.GetHashCode();
-                if (chunkDictionary.ContainsKey(cell.GetHashCode()))
-                {
-                    chunkDictionary[cell.GetHashCode()] = chunk;
-                }
-                else
-                {
-                    chunkDictionary.Add(cell.GetHashCode(), chunk);
-                }
+                createBrick(entry.cell.x, entry.cell.y, entry.cell.z);
             }
         }
     }
@@ -155,14 +104,35 @@ public class VoxelEditor : MonoBehaviour
                 }
             }
         }
+        
     }
 
     public void createBrick(int brickX, int brickY, int brickZ)
     {
+        Vector3i cell = new Vector3i(brickX, brickY, brickZ);
+
+        int cellHash = cell.GetHashCode();
+
+        if (chunkDictionary.ContainsKey(cell.GetHashCode()))
+        {
+            chunkPool.Release(chunkDictionary[cell.GetHashCode()]);
+        }
+
         Material material = Resources.Load("Materials/TestMaterial", typeof(Material)) as Material;
+
         ChunkFromOctreeRequest request = extractRequestPool.Catch();
         Chunk chunk = request.ReInitialize(voxelTree, extractor, material, brickX, brickY, brickZ, chunkPool, extractRequestPool);
+        chunk.gameObject.transform.parent = gameObject.transform;
+        chunk.gameObject.hideFlags = (HideFlags)0;
         requestHandlers.Grab().QueueRequest(request);
-        chunkDictionary.Add(new Vector3i(brickX * 16, brickY * 16, brickZ * 16).GetHashCode(), chunk);
+
+        if (chunkDictionary.ContainsKey(cell.GetHashCode()))
+        {
+            chunkDictionary[cell.GetHashCode()] = chunk;
+        }
+        else
+        {
+            chunkDictionary.Add(cell.GetHashCode(), chunk);
+        }
     }
 }

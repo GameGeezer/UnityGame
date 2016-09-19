@@ -68,4 +68,52 @@ public class Brick : Grid3D<byte> {
             }
         }
     }
+
+    public string HexRepresentation()
+    {
+        for(int x = 0; x < width; ++x)
+        {
+            for(int y = 0; y < height; ++y)
+            {
+               // BitConverter.ToString(data[x, y, 0]);
+            }
+        }
+        return "";
+    }
+
+    public string EncodeData()
+    {
+        string encoded = "";
+
+        for (int x = 0; x < width; ++x)
+        {
+            for (int y = 0; y < height; ++y)
+            {
+                for (int z = 0; z < depth; ++z)
+                {
+                    encoded += GetValue(x, y, z).ToString("X1") + ",";
+                }
+            }
+        }
+
+        return encoded;
+    }
+
+    public string DecodeData(string data)
+    {
+        string encoded = "";
+
+        for (int x = 0; x < width; ++x)
+        {
+            for (int y = 0; y < height; ++y)
+            {
+                for (int z = 0; z < depth; ++z)
+                {
+                    encoded += GetValue(x, y, z).ToString("X1") + ",";
+                }
+            }
+        }
+
+        return encoded;
+    }
 }

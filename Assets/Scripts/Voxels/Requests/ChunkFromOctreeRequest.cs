@@ -46,9 +46,9 @@ class ChunkFromOctreeRequest : Request
 
     public void PrePerformance()
     {
-        vector3Pool.ReleaseAll(chunk.ChunkMesh.vertices);
-        vector3Pool.ReleaseAll(chunk.ChunkMesh.normals);
-        vector2Pool.ReleaseAll(chunk.ChunkMesh.uv);
+        vector3Pool.ReleaseAll(chunk.GetMesh().vertices);
+        vector3Pool.ReleaseAll(chunk.GetMesh().normals);
+        vector2Pool.ReleaseAll(chunk.GetMesh().uv);
         colors.Clear();
         vertices.Clear();
         normals.Clear();
@@ -74,14 +74,14 @@ class ChunkFromOctreeRequest : Request
 
         chunk.Initialize(material, brickCell.x * brickTree.BrickDimensionX, brickCell.y * brickTree.BrickDimensionY, brickCell.z * brickTree.BrickDimensionZ);
 
-        chunk.ChunkMesh.vertices = vertices.ToArray();
-        chunk.ChunkMesh.colors = colors.ToArray();
-        chunk.ChunkMesh.triangles = indices.ToArray();
-        chunk.ChunkMesh.normals = normals.ToArray();
-        chunk.ChunkMesh.uv = uv.ToArray(); // add this line to the code here
-        chunk.ChunkMesh.Optimize();
+        chunk.GetMesh().vertices = vertices.ToArray();
+        chunk.GetMesh().colors = colors.ToArray();
+        chunk.GetMesh().triangles = indices.ToArray();
+        chunk.GetMesh().normals = normals.ToArray();
+        chunk.GetMesh().uv = uv.ToArray(); // add this line to the code here
+        chunk.GetMesh().Optimize();
 
-        chunk.UpdateCollider(chunk.ChunkMesh.vertices, chunk.ChunkMesh.triangles);
+        chunk.UpdateCollider(chunk.GetMesh().vertices, chunk.GetMesh().triangles);
 
         parentPool.Release(this);
     }
